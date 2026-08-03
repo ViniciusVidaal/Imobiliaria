@@ -1,0 +1,3 @@
+import imageCompression from "browser-image-compression"; import { getDownloadURL, ref, uploadBytes } from "firebase/storage"; import { storage } from "@/lib/firebase";
+export async function compressToWebP(file:File){const compressed=await imageCompression(file,{maxSizeMB:.145,maxWidthOrHeight:1920,useWebWorker:true,fileType:"image/webp",initialQuality:.82}); return new File([compressed],`${crypto.randomUUID()}.webp`,{type:"image/webp"})}
+export async function uploadPropertyImages(files:File[]){return Promise.all(files.map(async file=>{const webp=await compressToWebP(file); const target=ref(storage,`properties/${Date.now()}-${webp.name}`); await uploadBytes(target,webp,{contentType:"image/webp"}); return getDownloadURL(target)}))}

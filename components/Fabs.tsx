@@ -1,0 +1,1 @@
+import { Instagram, MessageCircle } from "lucide-react"; export function Fabs(){return <div className="fabs"><button className="fab instagram" aria-label="Instagram"><Instagram/></button><button className="fab whatsapp" aria-label="WhatsApp"><MessageCircle/></button></div>}

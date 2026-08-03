@@ -1,0 +1,2 @@
+"use client"; import { onAuthStateChanged,User } from "firebase/auth"; import { useEffect,useState } from "react"; import { auth } from "@/lib/firebase";
+export function AuthGuard({children}:{children:(user:User)=>React.ReactNode}){const [user,setUser]=useState<User|null|undefined>();useEffect(()=>onAuthStateChanged(auth,setUser),[]);if(user===undefined)return <div className="admin-loading">Carregando...</div>;if(!user)return null;return <>{children(user)}</>}
