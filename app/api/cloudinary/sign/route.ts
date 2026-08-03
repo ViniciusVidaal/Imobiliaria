@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 async function isAuthenticated(request: NextRequest) {
-  const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const token = request.headers
+    .get("authorization")
+    ?.replace(/^Bearer\s+/i, "");
   const firebaseApiKey =
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
     "AIzaSyDEZvX8PtJkHK5o--xzVc6BOgyzriaXais";
@@ -37,8 +39,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const body = await request.json().catch(() => ({}));
+  const testRunId =
+    typeof body.testRunId === "string"
+      ? body.testRunId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 60)
+      : "";
   const timestamp = Math.floor(Date.now() / 1000);
-  const folder = "al7-imoveis/properties";
+  const folder = testRunId
+    ? `al7-imoveis/load-tests/${testRunId}`
+    : "al7-imoveis/properties";
   const signature = createHash("sha1")
     .update(`folder=${folder}&timestamp=${timestamp}${apiSecret}`)
     .digest("hex");
