@@ -37,11 +37,11 @@ export default function PropertyPage() {
       <section className="detail-content">
         <article>
           <div className="features">
-            <span><BedDouble /><b>{property.bedrooms}</b> quartos</span>
-            <span><Bath /><b>{property.bathrooms}</b> banheiros</span>
-            {!!property.suites && property.suites > 0 && <span><Bed /><b>{property.suites}</b> suítes</span>}
-            <span><CarFront /><b>{property.parking}</b> vagas</span>
-            <span><Maximize /><b>{property.area}</b> m²</span>
+            <span><BedDouble /><span className="feature-info"><b>{property.bedrooms}</b> quartos</span></span>
+            <span><Bath /><span className="feature-info"><b>{property.bathrooms}</b> banheiros</span></span>
+            {!!property.suites && property.suites > 0 && <span><Bed /><span className="feature-info"><b>{property.suites}</b> suítes</span></span>}
+            <span><CarFront /><span className="feature-info"><b>{property.parking}</b> vagas</span></span>
+            <span><Maximize /><span className="feature-info"><b>{property.area}</b> m²</span></span>
           </div>
 
           <div className="detail-price">
