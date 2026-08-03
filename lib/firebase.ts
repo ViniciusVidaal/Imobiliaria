@@ -11,4 +11,6 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:569527791464:web:a30dcb395ed8e83cbbf0dd",
 };
 const app=getApps().length?getApps()[0]:initializeApp(firebaseConfig);
-export const auth=getAuth(app); export const db=getFirestore(app); export const storage=getStorage(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);

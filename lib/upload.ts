@@ -56,7 +56,7 @@ export async function uploadPropertyImages(
     await withTimeout(
       uploadBytes(target, webp, { contentType: "image/webp" }),
       45_000,
-      `O envio de ${file.name} demorou demais. Verifique se o Firebase Storage está ativado.`,
+      `O envio de ${file.name} falhou. Ative o Storage e confirme que o projeto está no plano Blaze.`,
     );
     urls.push(
       await withTimeout(

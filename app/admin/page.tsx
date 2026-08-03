@@ -72,6 +72,10 @@ export default function Admin() {
   }
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (form.images.length + files.length > 30) {
+      setNotice("Cada imóvel pode ter no máximo 30 fotos.");
+      return;
+    }
     setBusy(true);
     setNotice(
       files.length ? "Comprimindo imagens para WebP..." : "Salvando imóvel...",
@@ -269,13 +273,26 @@ export default function Admin() {
               <Upload />
               <b>Adicionar fotos</b>
               <span>
-                JPG/PNG serão comprimidos e convertidos para WebP (~150 KB)
+                JPG/PNG serão convertidos para WebP (~150 KB). Máximo de 30
+                fotos por imóvel.
               </span>
               <input
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                onChange={(e) => {
+                  const selected = Array.from(e.target.files || []);
+                  const available = Math.max(0, 30 - form.images.length);
+                  if (selected.length > available) {
+                    setFiles(selected.slice(0, available));
+                    setNotice(
+                      `Limite de 30 fotos. Foram selecionadas apenas ${available}.`,
+                    );
+                    return;
+                  }
+                  setFiles(selected);
+                  setNotice("");
+                }}
               />
               {files.length > 0 && (
                 <em>{files.length} arquivo(s) selecionado(s)</em>
