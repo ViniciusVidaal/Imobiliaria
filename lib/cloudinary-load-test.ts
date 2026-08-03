@@ -72,7 +72,7 @@ export async function runCloudinaryLoadTest(
 ) {
   const existing = await getDocs(
     query(
-      collection(db, "properties"),
+      collection(db, "imoveis"),
       where("testRunId", "==", CLOUDINARY_TEST_RUN_ID),
     ),
   );
@@ -103,7 +103,7 @@ export async function runCloudinaryLoadTest(
       },
       CLOUDINARY_TEST_RUN_ID,
     );
-    const reference = doc(collection(db, "properties"));
+    const reference = doc(collection(db, "imoveis"));
     await setDoc(reference, {
       title: `[TESTE CLOUDINARY] Imóvel ${propertyIndex + 1}`,
       slug: `teste-cloudinary-${propertyIndex + 1}-${reference.id.slice(0, 6)}`,
@@ -123,6 +123,7 @@ export async function runCloudinaryLoadTest(
       sold: false,
       testRunId: CLOUDINARY_TEST_RUN_ID,
       createdAt: serverTimestamp(),
+      dataCadastro: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
   }
@@ -152,7 +153,7 @@ export async function cleanupCloudinaryLoadTest(
   onProgress(70, "Removendo imóveis de teste do Firestore...");
   const snapshot = await getDocs(
     query(
-      collection(db, "properties"),
+      collection(db, "imoveis"),
       where("testRunId", "==", CLOUDINARY_TEST_RUN_ID),
     ),
   );

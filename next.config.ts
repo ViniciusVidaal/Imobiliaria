@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
         pathname: "/zvdjnfzr/**",
       },
+      { protocol: "https", hostname: "img.dfimoveis.com.br" },
     ],
   },
 };

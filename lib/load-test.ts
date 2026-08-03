@@ -34,7 +34,7 @@ export async function createLoadTestProperties(
 ) {
   const existing = await getDocs(
     query(
-      collection(db, "properties"),
+      collection(db, "imoveis"),
       where("testRunId", "==", LOAD_TEST_RUN_ID),
     ),
   );
@@ -45,7 +45,7 @@ export async function createLoadTestProperties(
 
   const batch = writeBatch(db);
   for (let index = 0; index < 200; index += 1) {
-    const reference = doc(collection(db, "properties"));
+    const reference = doc(collection(db, "imoveis"));
     const number = index + 1;
     const type = PROPERTY_TYPES[index % PROPERTY_TYPES.length];
     const location = LOCATIONS[index % LOCATIONS.length];
@@ -68,6 +68,7 @@ export async function createLoadTestProperties(
       sold: index % 17 === 0,
       testRunId: LOAD_TEST_RUN_ID,
       createdAt: serverTimestamp(),
+      dataCadastro: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
     onProgress(Math.round(((index + 1) / 200) * 90));
@@ -82,7 +83,7 @@ export async function deleteLoadTestProperties(
 ) {
   const snapshot = await getDocs(
     query(
-      collection(db, "properties"),
+      collection(db, "imoveis"),
       where("testRunId", "==", LOAD_TEST_RUN_ID),
     ),
   );
