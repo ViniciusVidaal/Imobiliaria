@@ -2,7 +2,7 @@ import { getApps, initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDEZvX8PtJkHK5o--xzVc6BOgyzriaXais",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "imobiliaria-template.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "imobiliaria-template",

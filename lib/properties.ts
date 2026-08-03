@@ -118,7 +118,7 @@ export async function getPropertiesPage(
 }
 
 export const saveProperty = async (data: Omit<Property, "id">, id?: string) => {
-  const reference = id ? doc(db, "properties", id) : doc(propertiesCollection);
+  const reference = id ? doc(db, "imoveis", id) : doc(propertiesCollection);
   await setDoc(
     reference,
     {
