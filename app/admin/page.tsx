@@ -36,6 +36,7 @@ const blank = {
   price: 0,
   bedrooms: 0,
   bathrooms: 0,
+  suites: 0,
   parking: 0,
   area: 0,
   images: [] as string[],
@@ -68,7 +69,7 @@ export default function Admin() {
   function edit(p: Property) {
     setEditing(p);
     const { id, ...rest } = p;
-    setForm(rest);
+    setForm({ ...blank, ...rest, suites: rest.suites ?? 0 });
     scrollTo({ top: 0, behavior: "smooth" });
   }
   async function submit(e: FormEvent) {
@@ -248,6 +249,17 @@ export default function Admin() {
                 value={form.bathrooms}
                 onChange={(e) =>
                   setForm({ ...form, bathrooms: +e.target.value })
+                }
+              />
+            </label>
+            <label>
+              Suítes
+              <input
+                type="number"
+                min="0"
+                value={form.suites}
+                onChange={(e) =>
+                  setForm({ ...form, suites: +e.target.value })
                 }
               />
             </label>

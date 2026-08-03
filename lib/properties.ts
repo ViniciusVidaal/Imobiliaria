@@ -56,6 +56,7 @@ const mapProperty = (snapshot: QueryDocumentSnapshot) => {
     price: parsePrice(data.price ?? data.preco),
     bedrooms: Number(data.bedrooms ?? data.quartos ?? 0),
     bathrooms: Number(data.bathrooms ?? data.banheiros ?? 0),
+    suites: Number(data.suites ?? data.suite ?? 0),
     parking: Number(data.parking ?? data.vagas ?? data.garagens ?? 0),
     area: Number(data.area ?? data.areaUtil ?? data.metragem ?? 0),
     images: data.images || data.fotos || [],
