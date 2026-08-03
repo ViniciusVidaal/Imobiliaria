@@ -74,6 +74,7 @@ footer .al7-logo{width:54px;height:54px}
 
 /* Página individual do imóvel */
 @media(min-width:769px){.property-gallery{width:calc(100% - 80px);max-width:1280px;margin-inline:auto;padding:0}.gallery-main{height:min(60vh,610px)}}
+@media(min-width:769px){.features>span{min-width:105px;flex:1 1 105px;padding:15px 12px;border-radius:12px;background:#fff}}
 .gallery-main>img{object-position:center center}
 .features{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:26px;padding-bottom:28px}
 .features>span{min-width:0;flex:0 0 auto;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:transparent;text-align:center}
