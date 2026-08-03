@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Logo } from "@/components/Logo";
 export function Preloader() {
   const [show, setShow] = useState(true);
   useEffect(() => {
@@ -8,11 +9,7 @@ export function Preloader() {
   }, []);
   return show ? (
     <div className="preloader">
-      <div className="brand big">
-        <span>AL</span>
-        <b>7</b>
-        <small>IMÓVEIS</small>
-      </div>
+      <Logo light large />
       <p>Seja bem-vindo</p>
       <i>
         <em />
