@@ -4,7 +4,7 @@ import { FormEvent, ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
-import { Building2, History, LogOut, Menu, PlusCircle, UserPlus, X } from "lucide-react";
+import { ArrowLeft, Building2, History, LogOut, Menu, PlusCircle, UserPlus, X } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { Logo } from "@/components/Logo";
 import "./admin.css";
@@ -41,9 +41,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <aside className={`admin-sidebar ${menuOpen ? "open" : ""}`}>
       <div className="admin-brand"><Logo/><div><b>AL7 Gestão</b><small>{user.displayName || user.email}</small></div></div>
       <nav>{links.map(({ href, label, icon: Icon }) => <Link href={href} key={href} className={pathname === href || (href !== "/admin" && pathname.startsWith(href)) ? "active" : ""} onClick={() => setMenuOpen(false)}><Icon />{label}</Link>)}</nav>
+      <Link href="/" className="admin-back-site"><ArrowLeft /> Voltar para o site</Link>
       <button className="admin-logout" onClick={() => signOut(auth)}><LogOut /> Sair do painel</button>
     </aside>
     <button className="admin-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir navegação">{menuOpen ? <X/> : <Menu/>}</button>
+    <Link href="/" className="admin-site-mobile"><ArrowLeft /> Voltar ao site</Link>
     {menuOpen && <button className="admin-menu-backdrop" onClick={() => setMenuOpen(false)} aria-label="Fechar navegação"/>}
     <main className="admin-content">{children}</main>
   </div>;
