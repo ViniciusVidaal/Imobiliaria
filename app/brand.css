@@ -73,6 +73,7 @@ footer .al7-logo{width:54px;height:54px}
 @media(max-width:768px){.site-header .al7-logo{width:54px;height:54px}footer .al7-logo{width:48px;height:48px}}
 
 /* Página individual do imóvel */
+.detail-heading{justify-content:center;text-align:center}.detail-heading>div{width:100%;display:flex;flex-direction:column;align-items:center}.detail-heading p{justify-content:center}.detail-code{display:inline-flex;gap:5px;margin-top:13px;padding:7px 11px;border-radius:7px;background:rgba(7,31,43,.06);color:#63747c;font-size:9px;letter-spacing:.1em;text-transform:uppercase}.detail-code b{color:var(--red)}
 @media(min-width:769px){.property-gallery{width:calc(100% - 80px);max-width:1280px;margin-inline:auto;padding:0}.gallery-main{height:min(60vh,610px)}}
 @media(min-width:769px){.features>span{min-width:105px;flex:1 1 105px;padding:15px 12px;border-radius:12px;background:#fff}}
 .gallery-main>img{object-position:center center}
