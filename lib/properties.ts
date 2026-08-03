@@ -1,5 +1,6 @@
 import {
   QueryDocumentSnapshot,
+  DocumentSnapshot,
   collection,
   deleteDoc,
   doc,
@@ -13,6 +14,7 @@ import {
   startAfter,
   updateDoc,
   deleteField,
+  where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Property } from "@/lib/types";
@@ -27,8 +29,8 @@ function parsePrice(value: unknown) {
     : 0;
 }
 
-const mapProperty = (snapshot: QueryDocumentSnapshot) => {
-  const data = snapshot.data();
+const mapProperty = (snapshot: QueryDocumentSnapshot | DocumentSnapshot) => {
+  const data = snapshot.data() || {};
   const transaction = data.transaction || data.tipoTransacao;
   const location =
     data.location ||
@@ -94,6 +96,27 @@ export interface PropertiesPage {
   hasMore: boolean;
 }
 
+export interface PropertyFilters {
+  transaction?: string;
+  type?: string;
+  location?: string;
+  bedrooms?: string;
+  maxPrice?: number;
+}
+
+function matchesFilters(property: Property, filters: PropertyFilters) {
+  const bedroomMatch = !filters.bedrooms ||
+    (filters.bedrooms === "4+"
+      ? property.bedrooms >= 4
+      : property.bedrooms === Number(filters.bedrooms));
+  return !property.sold &&
+    (!filters.transaction || property.transaction === filters.transaction) &&
+    (!filters.type || property.type === filters.type) &&
+    (!filters.location || property.location === filters.location) &&
+    bedroomMatch &&
+    (!filters.maxPrice || property.price <= filters.maxPrice);
+}
+
 export async function getPropertiesPage(
   pageSize = 12,
   cursor?: QueryDocumentSnapshot | null,
@@ -117,13 +140,78 @@ export async function getPropertiesPage(
   };
 }
 
+// A consulta usa o filtro mais seletivo no Firestore e percorre apenas os lotes
+// necessarios ate completar a pagina. Assim o resultado nunca fica limitado aos
+// primeiros 12 itens do catalogo.
+export async function getFilteredPropertiesPage(
+  filters: PropertyFilters,
+  pageSize = 12,
+  cursor?: QueryDocumentSnapshot | null,
+): Promise<PropertiesPage> {
+  const scanSize = Math.max(pageSize * 2, 24);
+  const primary: [string, string | number] | null = filters.location
+    ? ["location", filters.location]
+    : filters.type
+      ? ["type", filters.type]
+      : filters.bedrooms && filters.bedrooms !== "4+"
+        ? ["bedrooms", Number(filters.bedrooms)]
+        : filters.transaction
+          ? ["transaction", filters.transaction]
+          : null;
+  const found: Property[] = [];
+  let nextCursor = cursor ?? null;
+  let hasMore = true;
+
+  while (found.length < pageSize && hasMore) {
+    const constraints = [
+      ...(primary ? [where(primary[0], "==", primary[1])] : []),
+      orderBy("dataCadastro", "desc"),
+      ...(nextCursor ? [startAfter(nextCursor)] : []),
+      limit(scanSize),
+    ];
+    const snapshot = await getDocs(query(propertiesCollection, ...constraints));
+    const docs = snapshot.docs;
+    hasMore = docs.length === scanSize;
+    for (const item of docs) {
+      nextCursor = item;
+      const property = mapProperty(item);
+      if (matchesFilters(property, filters)) found.push(property);
+      if (found.length === pageSize) {
+        hasMore = true;
+        break;
+      }
+    }
+  }
+
+  return { items: found.slice(0, pageSize), cursor: nextCursor, hasMore };
+}
+
+export function subscribeProperty(
+  slugOrId: string,
+  callback: (property: Property | null) => void,
+) {
+  const looksLikeId = /^\d+$/.test(slugOrId) || /^[A-Za-z0-9]{20}$/.test(slugOrId);
+  if (looksLikeId) {
+    return onSnapshot(doc(db, "imoveis", slugOrId), (snapshot) =>
+      callback(snapshot.exists() ? mapProperty(snapshot) : null),
+    );
+  }
+  return onSnapshot(
+    query(propertiesCollection, where("slug", "==", slugOrId), limit(1)),
+    (snapshot) => callback(snapshot.empty ? null : mapProperty(snapshot.docs[0])),
+  );
+}
+
 export const saveProperty = async (data: Omit<Property, "id">, id?: string) => {
   const reference = id ? doc(db, "imoveis", id) : doc(propertiesCollection);
+  const slug = id
+    ? data.slug || reference.id
+    : `${data.slug || reference.id}-${reference.id.slice(0, 6).toLowerCase()}`;
   await setDoc(
     reference,
     {
       ...data,
-      slug: data.slug || reference.id,
+      slug,
       updatedAt: serverTimestamp(),
       dataAtualizacao: serverTimestamp(),
       titulo: data.title,

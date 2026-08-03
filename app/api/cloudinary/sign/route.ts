@@ -28,9 +28,10 @@ export async function POST(request: NextRequest) {
   const folder = testRunId
     ? `al7-imoveis/load-tests/${testRunId}`
     : "al7-imoveis/properties";
+  const transformation = "c_limit,f_webp,q_auto:good,w_1600";
   const signature = createHash("sha1")
-    .update(`folder=${folder}&timestamp=${timestamp}${apiSecret}`)
+    .update(`folder=${folder}&timestamp=${timestamp}&transformation=${transformation}${apiSecret}`)
     .digest("hex");
 
-  return NextResponse.json({ cloudName, apiKey, timestamp, folder, signature });
+  return NextResponse.json({ cloudName, apiKey, timestamp, folder, transformation, signature });
 }

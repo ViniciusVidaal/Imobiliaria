@@ -36,9 +36,14 @@ export default function RegisteredPropertiesPage() {
   async function remove(property: Property) {
     if (!confirm(`Excluir “${property.title}” permanentemente?`)) return;
     try {
-      await deleteCloudinaryImages(property.images || []);
       await removeProperty(property.id);
-      await addAudit("Imóvel excluído", `${property.title} · Código ${propertyCode(property)} · imagens removidas do Cloudinary`);
+      try {
+        await deleteCloudinaryImages(property.images || []);
+        await addAudit("Imóvel excluído", `${property.title} · Código ${propertyCode(property)} · imagens removidas do Cloudinary`);
+      } catch (cleanupError) {
+        await addAudit("Imóvel excluído com alerta de imagens", `${property.title} · Código ${propertyCode(property)} · ${cleanupError instanceof Error ? cleanupError.message : "falha no Cloudinary"}`);
+        alert("O imóvel foi excluído do site, mas algumas imagens podem ter ficado no Cloudinary. Tente a limpeza novamente pelo suporte.");
+      }
     } catch (error) {
       alert(`Não foi possível concluir a exclusão: ${error instanceof Error ? error.message : "erro inesperado"}`);
     }

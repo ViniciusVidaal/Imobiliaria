@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { Fabs } from "@/components/Fabs";
 import { PropertyGallery } from "@/components/PropertyGallery";
 import { VisitModal } from "@/components/VisitModal";
-import { subscribeProperties } from "@/lib/properties";
+import { subscribeProperty } from "@/lib/properties";
 import { money } from "@/lib/constants";
 import type { Property } from "@/lib/types";
 
@@ -16,7 +16,7 @@ export default function PropertyPage() {
   const [property, setProperty] = useState<Property | null>();
   const [visitOpen, setVisitOpen] = useState(false);
 
-  useEffect(() => subscribeProperties((items) => setProperty(items.find((item) => item.slug === slug || item.id === slug) || null)), [slug]);
+  useEffect(() => subscribeProperty(slug, setProperty), [slug]);
 
   if (property === undefined) return <div className="detail-loading">Carregando imóvel...</div>;
   if (!property) return <><Header /><div className="detail-loading"><h1>Imóvel não encontrado</h1><p>Este anúncio pode ter sido removido ou vendido.</p></div></>;

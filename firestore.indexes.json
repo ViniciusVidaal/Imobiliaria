@@ -1,0 +1,37 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "imoveis",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "transaction", "order": "ASCENDING" },
+        { "fieldPath": "dataCadastro", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "imoveis",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "location", "order": "ASCENDING" },
+        { "fieldPath": "dataCadastro", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "imoveis",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "dataCadastro", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "imoveis",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bedrooms", "order": "ASCENDING" },
+        { "fieldPath": "dataCadastro", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

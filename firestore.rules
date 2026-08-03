@@ -3,13 +3,41 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedUser() { return request.auth != null && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.active == true; }
     function isCEO() { return signedUser() && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'ceo'; }
-    match /properties/{propertyId} { allow read: if true; allow create, update, delete: if signedUser(); }
-    match /imoveis/{propertyId} { allow read: if true; allow create, update, delete: if signedUser(); }
+    function validProperty() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['title', 'slug', 'description', 'transaction', 'type', 'location', 'price', 'bedrooms', 'bathrooms', 'parking', 'area', 'images', 'featured', 'sold'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 180
+        && data.slug is string && data.slug.size() > 0 && data.slug.size() <= 220
+        && data.description is string && data.description.size() > 0 && data.description.size() <= 12000
+        && data.transaction in ['Compra', 'Locação']
+        && data.type in ['Terreno', 'Casa', 'Loja comercial', 'Apartamento', 'Apartamento duplex', 'Fazenda', 'Chácara']
+        && data.location is string && data.location.size() > 0 && data.location.size() <= 140
+        && data.price is number && data.price > 0
+        && data.area is number && data.area > 0
+        && data.bedrooms is int && data.bedrooms >= 0 && data.bedrooms <= 100
+        && data.bathrooms is int && data.bathrooms >= 0 && data.bathrooms <= 100
+        && data.parking is int && data.parking >= 0 && data.parking <= 100
+        && (!('suites' in data) || (data.suites is int && data.suites >= 0 && data.suites <= 100))
+        && data.images is list && data.images.size() > 0 && data.images.size() <= 30
+        && data.featured is bool && data.sold is bool;
+    }
+    match /properties/{propertyId} { allow read: if true; allow create, update: if signedUser() && validProperty(); allow delete: if signedUser(); }
+    match /imoveis/{propertyId} { allow read: if true; allow create, update: if signedUser() && validProperty(); allow delete: if signedUser(); }
     match /usuarios/{userId} {
       allow read: if request.auth != null && (userId == request.auth.uid || isCEO());
       allow create, update, delete: if isCEO();
     }
-    match /historico/{entryId} { allow read, create: if signedUser(); allow update, delete: if false; }
+    match /historico/{entryId} {
+      allow read: if signedUser();
+      allow create: if signedUser()
+        && request.resource.data.keys().hasOnly(['action', 'details', 'userId', 'userName', 'userEmail', 'createdAt'])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.userName == get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.name
+        && request.resource.data.userEmail == get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.email
+        && request.resource.data.action is string && request.resource.data.action.size() <= 120
+        && request.resource.data.details is string && request.resource.data.details.size() <= 1000;
+      allow update, delete: if false;
+    }
     match /configuracoes/{documentId} { allow read, update: if isCEO(); allow create, delete: if false; }
   }
 }

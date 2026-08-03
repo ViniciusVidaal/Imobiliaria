@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface AuditEntry {
@@ -15,12 +15,15 @@ export interface AdminUserProfile { id:string; name:string; email:string; role:A
 
 export async function addAudit(action: string, details: string) {
   const user = auth.currentUser;
+  if (!user) throw new Error("Sua sessão expirou.");
+  const profile = await getDoc(doc(db, "usuarios", user.uid));
+  if (!profile.exists() || profile.data().active !== true) throw new Error("Usuário sem permissão.");
   await addDoc(collection(db, "historico"), {
     action,
     details,
-    userId: user?.uid || "unknown",
-    userName: user?.displayName || user?.email?.split("@")[0] || "Administrador",
-    userEmail: user?.email || "",
+    userId: user.uid,
+    userName: profile.data().name,
+    userEmail: profile.data().email,
     createdAt: serverTimestamp(),
   });
 }
@@ -38,6 +41,15 @@ export async function verifyRegistrationCode(code: string) {
 
 export async function saveUserProfile(uid: string, name: string, email: string, role: AdminRole) {
   await setDoc(doc(db, "usuarios", uid), { name, email: email.toLowerCase(), role, active: true, createdAt: serverTimestamp() });
+}
+
+export async function findUserByEmail(email: string) {
+  const snapshot = await getDocs(query(collection(db, "usuarios"), where("email", "==", email.toLowerCase()), limit(1)));
+  return snapshot.empty ? null : { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as AdminUserProfile;
+}
+
+export async function reactivateUser(user: AdminUserProfile, name: string, role: AdminRole) {
+  await updateDoc(doc(db, "usuarios", user.id), { name, role, active: true, updatedAt: serverTimestamp() });
 }
 
 export function subscribeUsers(callback: (users: AdminUserProfile[]) => void) {
@@ -62,5 +74,5 @@ export async function recoverUserAreaAccess(email: string) {
 
 export async function removeAgent(user: AdminUserProfile) {
   if (user.role === "ceo") throw new Error("Contas CEO não podem ser excluídas por esta tela.");
-  await deleteDoc(doc(db, "usuarios", user.id));
+  await updateDoc(doc(db, "usuarios", user.id), { active: false, disabledAt: serverTimestamp() });
 }
