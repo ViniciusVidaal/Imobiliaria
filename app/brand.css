@@ -73,8 +73,8 @@ footer .al7-logo{width:54px;height:54px}
 @media(max-width:768px){.site-header .al7-logo{width:54px;height:54px}footer .al7-logo{width:48px;height:48px}}
 
 /* Página individual do imóvel */
-.detail-heading{justify-content:center;text-align:center}.detail-heading>div{width:100%;display:flex;flex-direction:column;align-items:center}.detail-heading p{justify-content:center}.detail-code{display:inline-flex;gap:5px;margin-top:13px;padding:7px 11px;border-radius:7px;background:rgba(7,31,43,.06);color:#63747c;font-size:9px;letter-spacing:.1em;text-transform:uppercase}.detail-code b{color:var(--red)}
-@media(min-width:769px){.property-gallery{width:calc(100% - 80px);max-width:1280px;margin-inline:auto;padding:0}.gallery-main{height:min(60vh,610px)}}
+.detail-heading{justify-content:center;text-align:center}.detail-heading>div{width:100%;display:flex;flex-direction:column;align-items:center}.detail-heading p{justify-content:center}.detail-code{display:inline-flex;gap:5px;margin-top:13px;padding:0;background:transparent;color:#7a888e;font-size:9px;letter-spacing:.08em;text-transform:uppercase}.detail-code b{color:#53656d;font-weight:800}
+@media(min-width:769px){.property-gallery{width:calc(100% - 80px);max-width:1280px;margin-inline:auto;padding:0}.gallery-main{height:min(64vh,640px);background:#eef0ef}.gallery-main>img{object-fit:contain!important;object-position:center center}}
 @media(min-width:769px){.features>span{min-width:105px;flex:1 1 105px;padding:15px 12px;border-radius:12px;background:#fff}}
 .gallery-main>img{object-position:center center}
 .features{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:26px;padding-bottom:28px}
@@ -89,6 +89,7 @@ footer .al7-logo{width:54px;height:54px}
 .detail-content aside{text-align:left}
 .fab.whatsapp svg{width:30px;height:30px}
 @media(max-width:768px){.features{display:flex;flex-wrap:wrap;justify-content:center;gap:22px 8px}.features>span{min-width:0;flex:0 0 92px;padding:0;text-align:center}.detail-price{text-align:center}.detail-primary-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:40px}.detail-primary-actions .btn{min-height:48px;padding:8px 7px;font-size:9px;line-height:1.25}.detail-primary-actions .btn svg{width:15px}.detail-content article>h2,.detail-content article>p{text-align:center}.detail-content aside{text-align:center}.detail-content aside .btn{margin-inline:auto}}
+@media(max-width:768px){.gallery-main{touch-action:pan-y}.property-gallery .gallery-arrow{display:none}}
 @media(min-width:769px){.features>span{min-width:105px;flex:1 1 105px;padding:18px 12px;border:1px solid rgba(7,31,43,.06);border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(7,31,43,.05)}}
 
 /* Agendamento de visita */
