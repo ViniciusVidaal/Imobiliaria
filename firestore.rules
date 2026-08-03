@@ -1,10 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /properties/{propertyId} { allow read: if true; allow create, update, delete: if request.auth != null; }
-    match /imoveis/{propertyId} { allow read: if true; allow create, update, delete: if request.auth != null; }
-    match /usuarios/{userId} { allow read, create, update: if request.auth != null; allow delete: if false; }
-    match /historico/{entryId} { allow read, create: if request.auth != null; allow update, delete: if false; }
-    match /configuracoes/{documentId} { allow read, update: if request.auth != null; allow create, delete: if false; }
+    function signedUser() { return request.auth != null && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.active == true; }
+    function isCEO() { return signedUser() && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'ceo'; }
+    match /properties/{propertyId} { allow read: if true; allow create, update, delete: if signedUser(); }
+    match /imoveis/{propertyId} { allow read: if true; allow create, update, delete: if signedUser(); }
+    match /usuarios/{userId} {
+      allow read: if request.auth != null && (userId == request.auth.uid || isCEO());
+      allow create, update, delete: if isCEO();
+    }
+    match /historico/{entryId} { allow read, create: if signedUser(); allow update, delete: if false; }
+    match /configuracoes/{documentId} { allow read, update: if isCEO(); allow create, delete: if false; }
   }
 }

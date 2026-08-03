@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface AuditEntry {
@@ -10,7 +10,8 @@ export interface AuditEntry {
   createdAt?: { toDate?: () => Date };
 }
 
-export interface AdminUserProfile { id:string; name:string; email:string; role:string; active:boolean; createdAt?:unknown }
+export type AdminRole = "ceo" | "agent";
+export interface AdminUserProfile { id:string; name:string; email:string; role:AdminRole; active:boolean; createdAt?:unknown }
 
 export async function addAudit(action: string, details: string) {
   const user = auth.currentUser;
@@ -35,8 +36,8 @@ export async function verifyRegistrationCode(code: string) {
   return code === configured;
 }
 
-export async function saveUserProfile(uid: string, name: string, email: string) {
-  await setDoc(doc(db, "usuarios", uid), { name, email, role: "agent", active: true, createdAt: serverTimestamp() });
+export async function saveUserProfile(uid: string, name: string, email: string, role: AdminRole) {
+  await setDoc(doc(db, "usuarios", uid), { name, email: email.toLowerCase(), role, active: true, createdAt: serverTimestamp() });
 }
 
 export function subscribeUsers(callback: (users: AdminUserProfile[]) => void) {
@@ -46,4 +47,20 @@ export function subscribeUsers(callback: (users: AdminUserProfile[]) => void) {
 export async function changeRegistrationCode(currentCode: string, newCode: string) {
   if (!(await verifyRegistrationCode(currentCode))) throw new Error("Senha administrativa atual incorreta.");
   await updateDoc(doc(db, "configuracoes", "admin"), { codigoCadastro: newCode, updatedAt: serverTimestamp() });
+}
+
+export function subscribeCurrentProfile(uid: string, callback: (profile: AdminUserProfile | null) => void) {
+  return onSnapshot(doc(db, "usuarios", uid), (snapshot) => callback(snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } as AdminUserProfile : null));
+}
+
+export async function recoverUserAreaAccess(email: string) {
+  const current = auth.currentUser;
+  if (!current || current.email?.toLowerCase() !== email.trim().toLowerCase()) return false;
+  const snapshot = await getDoc(doc(db, "usuarios", current.uid));
+  return snapshot.exists() && snapshot.data().active === true && snapshot.data().role === "ceo";
+}
+
+export async function removeAgent(user: AdminUserProfile) {
+  if (user.role === "ceo") throw new Error("Contas CEO não podem ser excluídas por esta tela.");
+  await deleteDoc(doc(db, "usuarios", user.id));
 }
