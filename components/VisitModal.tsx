@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { CalendarDays, CheckCircle2, Send, X } from "lucide-react";
+import { CheckCircle2, Send, X } from "lucide-react";
 import { whatsappUrl } from "@/lib/contact";
 
 interface VisitModalProps {
@@ -65,18 +65,15 @@ export function VisitModal({ open, propertyTitle, propertyCode, onClose }: Visit
         <p>O WhatsApp foi aberto com os dados preenchidos. Envie a mensagem para que a equipe AL7 confirme o horário.</p>
         <button className="btn primary" type="button" onClick={onClose}>Voltar ao imóvel</button>
       </div> : <>
-        <div className="visit-icon"><CalendarDays /></div>
-        <span className="eyebrow dark">Atendimento AL7</span>
-        <h2 id="visit-title">Solicitar visita</h2>
-        <p>Escolha o melhor dia e horário. Nossa equipe confirmará a disponibilidade pelo WhatsApp.</p>
+        <p className="visit-intro" id="visit-title">Escolha o melhor dia e horário. Nossa equipe confirmará a disponibilidade pelo WhatsApp.</p>
         <form onSubmit={submit}>
           <label>Nome<input name="name" type="text" placeholder="Seu nome completo" autoComplete="name" required /></label>
           <label>Telefone<input name="phone" type="tel" placeholder="(61) 99999-9999" autoComplete="tel" required /></label>
           <div className="visit-row">
             <label>Data<input name="date" type="date" min={today()} required /></label>
-            <label>Hora<input name="time" type="time" required /></label>
+            <label>Hora<input name="time" type="text" inputMode="numeric" maxLength={5} placeholder="00:00" pattern="([01][0-9]|2[0-3]):[0-5][0-9]" title="Informe um horário válido no formato HH:MM" onInput={(event) => { const input = event.currentTarget; const digits = input.value.replace(/\D/g, "").slice(0, 4); input.value = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits; }} required /></label>
           </div>
-          <label>Mensagem <small>opcional</small><textarea name="message" rows={4} placeholder="Conte algo que nossa equipe deva saber" /></label>
+          <label>Mensagem <small>opcional</small><textarea name="message" rows={3} placeholder="Conte algo que nossa equipe deva saber" /></label>
           <button className="visit-submit" type="submit"><Send /> Enviar pelo WhatsApp</button>
         </form>
       </>}
