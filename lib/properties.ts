@@ -12,6 +12,7 @@ import {
   setDoc,
   startAfter,
   updateDoc,
+  deleteField,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Property } from "@/lib/types";
@@ -52,7 +53,6 @@ const mapProperty = (snapshot: QueryDocumentSnapshot) => {
         : "Compra",
     type: data.type || data.tipoImovel || "Imóvel",
     location,
-    address: data.address || data.endereco || location,
     price: parsePrice(data.price ?? data.preco),
     bedrooms: Number(data.bedrooms ?? data.quartos ?? 0),
     bathrooms: Number(data.bathrooms ?? data.banheiros ?? 0),
@@ -130,6 +130,8 @@ export const saveProperty = async (data: Omit<Property, "id">, id?: string) => {
       tipoTransacao: data.transaction === "Compra" ? "Venda" : "Aluguel",
       tipoImovel: data.type,
       bairro: data.location,
+      address: deleteField(),
+      endereco: deleteField(),
       preco: data.price,
       fotos: data.images,
       ativo: !data.sold,

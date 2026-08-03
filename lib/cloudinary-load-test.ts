@@ -112,7 +112,6 @@ export async function runCloudinaryLoadTest(
       transaction: "Compra",
       type: "Casa",
       location: LOCATIONS[propertyIndex % LOCATIONS.length],
-      address: `Endereço do teste Cloudinary ${propertyIndex + 1}`,
       price: 500000 + propertyIndex * 100000,
       bedrooms: 3,
       bathrooms: 2,

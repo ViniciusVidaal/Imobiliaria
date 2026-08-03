@@ -30,7 +30,7 @@ export default function PropertyPage() {
         <div>
           <span>{property.type} · {property.transaction}</span>
           <h1>{property.title}</h1>
-          <p><MapPin /> {property.address || property.location}</p>
+          <p><MapPin /> {property.location}</p>
           <small className="detail-code">Código do imóvel: <b>{property.id.slice(0, 8).toUpperCase()}</b></small>
         </div>
       </section>

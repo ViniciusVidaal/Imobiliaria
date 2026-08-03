@@ -10,7 +10,7 @@ import { uploadPropertyImages } from "@/lib/upload";
 import { addAudit } from "@/lib/admin";
 import type { Property } from "@/lib/types";
 
-export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:"Apartamento", location:LOCATIONS[0], address:"", price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
+export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
 
 export function PropertyForm({ property }: { property?: Property }) {
   const router = useRouter();
@@ -32,6 +32,7 @@ export function PropertyForm({ property }: { property?: Property }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!form.images.length && !files.length) return setNotice("Adicione pelo menos uma foto do imóvel.");
     if (form.images.length + files.length > 30) return setNotice("Cada imóvel pode ter no máximo 30 fotos.");
     setBusy(true);
     try {
@@ -54,17 +55,16 @@ export function PropertyForm({ property }: { property?: Property }) {
       <label className="wide">Título<input value={form.title} onChange={(e)=>setForm({...form,title:e.target.value})} required placeholder="Ex.: Casa contemporânea no Lago Sul"/></label>
       <label>Transação<select value={form.transaction} onChange={(e)=>setForm({...form,transaction:e.target.value as Property["transaction"]})}><option>Compra</option><option>Locação</option></select></label>
       <label>Tipo<select value={form.type} onChange={(e)=>setForm({...form,type:e.target.value})}>{PROPERTY_TYPES.map((item)=><option key={item}>{item}</option>)}</select></label>
-      <label className="wide">Localização<select value={form.location} onChange={(e)=>setForm({...form,location:e.target.value})}>{LOCATIONS.map((item)=><option key={item}>{item}</option>)}</select></label>
-      <label className="wide">Endereço<input value={form.address} onChange={(e)=>setForm({...form,address:e.target.value})}/></label>
-      <label>Preço (R$)<input type="number" min="0" value={form.price} onChange={(e)=>setForm({...form,price:+e.target.value})}/></label>
-      <label>Área (m²)<input type="number" min="0" value={form.area} onChange={(e)=>setForm({...form,area:+e.target.value})}/></label>
-      <label>Quartos<input type="number" min="0" value={form.bedrooms} onChange={(e)=>setForm({...form,bedrooms:+e.target.value})}/></label>
-      <label>Banheiros<input type="number" min="0" value={form.bathrooms} onChange={(e)=>setForm({...form,bathrooms:+e.target.value})}/></label>
+      <label className="wide">Localização<select value={form.location} onChange={(e)=>setForm({...form,location:e.target.value})} required>{LOCATIONS.map((item)=><option key={item}>{item}</option>)}</select></label>
+      <label>Preço (R$)<input type="number" min="1" value={form.price} onChange={(e)=>setForm({...form,price:+e.target.value})} required/></label>
+      <label>Área (m²)<input type="number" min="1" value={form.area} onChange={(e)=>setForm({...form,area:+e.target.value})} required/></label>
+      <label>Quartos<input type="number" min="0" value={form.bedrooms} onChange={(e)=>setForm({...form,bedrooms:+e.target.value})} required/></label>
+      <label>Banheiros<input type="number" min="0" value={form.bathrooms} onChange={(e)=>setForm({...form,bathrooms:+e.target.value})} required/></label>
       <label>Suítes<input type="number" min="0" value={form.suites} onChange={(e)=>setForm({...form,suites:+e.target.value})}/></label>
       <label>Vagas<input type="number" min="0" value={form.parking} onChange={(e)=>setForm({...form,parking:+e.target.value})}/></label>
       <label className="wide">Descrição<textarea rows={6} value={form.description} onChange={(e)=>setForm({...form,description:e.target.value})} required/></label>
       {form.images.length > 0 && <div className="existing-images wide"><div><ImageIcon/><b>Fotos cadastradas</b><small>A primeira foto é a capa do imóvel.</small></div><div className="image-manager">{form.images.map((image,index)=><article key={`${image}-${index}`} className={index===0?"main":""}><div><Image src={image} alt={`Foto ${index+1}`} fill sizes="150px"/></div>{index===0?<span><Star/> Principal</span>:<button type="button" onClick={()=>setMain(index)}><Star/> Tornar principal</button>}<button type="button" className="remove-image" onClick={()=>setForm({...form,images:form.images.filter((_,i)=>i!==index)})} aria-label="Remover foto"><Trash2/></button></article>)}</div></div>}
-      <label className="upload wide"><Upload/><b>Adicionar imagens</b><span>Até 30 fotos. Elas serão comprimidas e convertidas para WebP.</span><input type="file" accept="image/*" multiple onChange={(e)=>{const selected=Array.from(e.target.files||[]).slice(0,Math.max(0,30-form.images.length));setFiles(selected);setNotice(selected.length?`${selected.length} arquivo(s) selecionado(s).`:"");}}/>{files.length>0&&<em>{files.length} nova(s) foto(s)</em>}</label>
+      <label className="upload wide"><Upload/><b>Adicionar imagens *</b><span>Obrigatório adicionar pelo menos uma foto e permitido no máximo 30. Elas serão comprimidas e convertidas para WebP.</span><input type="file" accept="image/*" multiple required={!form.images.length} onChange={(e)=>{const selected=Array.from(e.target.files||[]).slice(0,Math.max(0,30-form.images.length));setFiles(selected);setNotice(selected.length?`${selected.length} arquivo(s) selecionado(s).`:"");}}/>{files.length>0&&<em>{files.length} nova(s) foto(s)</em>}</label>
       {property && files.length>0 && <label className="main-new wide"><input type="checkbox" checked={newMain} onChange={(e)=>setNewMain(e.target.checked)}/> Usar a primeira nova imagem como foto principal</label>}
     </div>
     <div className="form-actions"><button className="admin-btn" disabled={busy}>{busy?"Processando...":property?"Salvar alterações":"Cadastrar imóvel"}</button></div>

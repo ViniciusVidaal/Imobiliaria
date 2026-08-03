@@ -57,7 +57,6 @@ export async function createLoadTestProperties(
       transaction: index % 4 === 0 ? "Locação" : "Compra",
       type,
       location,
-      address: `Endereço de teste ${number}, ${location.split(",")[0]}`,
       price: index % 4 === 0 ? 2500 + index * 25 : 280000 + index * 17500,
       bedrooms: (index % 5) + 1,
       bathrooms: (index % 4) + 1,
