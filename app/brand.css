@@ -21,3 +21,44 @@ h1,h2,h3{font-family:var(--font-display),sans-serif;font-weight:650;letter-spaci
 @media(max-width:1100px){.agent-grid{grid-template-columns:repeat(3,1fr)}.site-header nav{gap:18px}.hero-seal{display:none}}
 @media(max-width:768px){.site-header{top:9px;width:calc(100% - 20px);min-height:64px;padding:6px 8px 6px 14px}.al7-logo{width:106px;height:46px}.hero{min-height:1080px}.hero-copy{padding-top:35px}.hero h1{font-size:52px;line-height:.96}.hero-copy p{font-size:16px}.hero-actions{flex-direction:column;align-items:stretch}.hero-actions .btn{justify-content:center}.section{padding-top:86px;padding-bottom:86px}.section-head{text-align:center;align-items:center;justify-content:center}.section-head h2{font-size:43px}.section-head p{margin-inline:auto}.properties .property-grid,.agents .agent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.properties .property-card,.agents .agent-card{min-width:0;border-radius:12px;box-shadow:0 7px 24px rgba(7,31,43,.08)}.properties .property-image{height:150px}.properties .property-image>span{top:8px;left:8px;padding:5px 7px;font-size:7px}.properties .property-copy{padding:11px}.properties .property-copy small{display:block;overflow:hidden;font-size:8px;white-space:nowrap;text-overflow:ellipsis}.properties .property-copy h3{display:-webkit-box;min-height:38px;margin:6px 0;font-size:15px;line-height:1.25;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.properties .property-copy strong{font-size:14px}.properties .property-copy>div{justify-content:space-between;gap:3px;padding:10px 0}.properties .property-copy>div span{gap:3px;font-size:9px}.properties .property-copy svg{width:12px}.properties .property-copy>a{padding-top:10px;font-size:9px}.agents .agent-card{padding:7px 7px 15px}.agents .agent-card>div{height:205px;margin-bottom:0;border-radius:9px}.agents .agent-card span,.agents .agent-card h3{padding-inline:6px}.agents .agent-card span{min-height:28px;margin-top:11px;font-size:7px;line-height:1.4}.agents .agent-card h3{margin-top:3px;font-size:17px;line-height:1.1}.agents .agent-card button{margin:12px 6px 0;font-size:8px}.agents .agent-card button svg{width:13px}.testimonials{grid-template-columns:1fr;grid-template-areas:"intro" "stage" "dots";gap:25px;padding-inline:5%}.testimonials-intro{text-align:center}.testimonials-intro p{margin-inline:auto}.testimonial-stage{min-height:390px;padding:45px 26px;text-align:center}.testimonial-stars{justify-content:center}.testimonial-stage blockquote{font-size:25px}.testimonial-author{align-items:center}.testimonial-number{right:18px;bottom:16px}.testimonial-dots{justify-content:center;flex-wrap:wrap;max-width:220px;margin:auto}.split-copy{text-align:center}.split-copy ul{align-items:flex-start;text-align:left}.contact{text-align:center}.contact .btn{margin-inline:auto}footer{padding:24px 5% 17px;grid-template-columns:1fr;text-align:center;gap:10px}footer .al7-logo{margin:auto;width:76px;height:43px}footer>div:nth-of-type(1){justify-content:center}footer>small{grid-column:auto;padding-top:12px}}
 @media(max-width:520px){.hero h1{font-size:44px}.section-head h2,.split-copy h2{font-size:39px}.agents .agent-card>div{height:180px}.testimonial-stage blockquote{font-size:22px}}
+
+/* Equipe AL7 */
+.agent-card{display:flex;flex-direction:column;min-height:535px;padding:22px 18px 18px;text-align:center}
+.agent-card>.agent-photo{position:relative;width:180px;height:180px;margin:0 auto 24px;overflow:hidden;border-radius:10px}
+.agent-card>.agent-photo img{object-fit:cover}
+.agent-card>.agent-info{height:auto;min-height:138px;padding:0;text-align:center}
+.agent-card>.agent-info h3{margin:0 0 12px;padding:0;color:var(--red);font-size:27px;line-height:1;white-space:nowrap}
+.agent-card>.agent-info span{margin:0;padding:0;color:var(--ink);font-size:13px;font-weight:700;letter-spacing:0;text-transform:none}
+.agent-card>.agent-info p{margin:8px 0 0;font-size:13px;line-height:1.35}
+.agent-card>.agent-info small{display:block;margin-top:7px;font-size:12px}
+.agent-social{height:auto!important;display:flex;justify-content:center;gap:7px;margin:4px 0 22px}
+.agent-social button{width:42px;height:42px;margin:0;display:grid;place-items:center;border:0;border-radius:7px;background:var(--red);color:#fff;cursor:pointer}
+.agent-social button svg{width:18px}
+.agent-actions{height:auto!important;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.agent-actions button{min-height:46px;margin:0;justify-content:center;border:0;border-radius:8px;background:var(--red);color:#fff;font-size:12px;font-weight:800;text-transform:none;cursor:pointer}
+.agent-actions button svg{width:15px}
+footer{display:grid;grid-template-columns:auto 1fr auto;min-height:76px;padding:12px 7%;gap:24px;border:0}
+footer .al7-logo{width:72px;height:46px}
+footer>div:nth-of-type(1){display:flex;justify-content:center;align-items:center;gap:7px;color:rgba(255,255,255,.7);font-size:11px}
+footer>div:nth-of-type(1) svg{width:15px}
+footer>small{grid-column:auto;padding:0;border:0;color:rgba(255,255,255,.48);font-size:10px;text-align:right}
+
+@media(max-width:768px){
+  .agents .agent-card{min-height:390px;padding:10px 7px 8px}
+  .agents .agent-card>.agent-photo{width:118px;height:118px;margin:5px auto 14px;border-radius:8px}
+  .agents .agent-card>.agent-info{height:auto;min-height:108px;padding:0 2px}
+  .agents .agent-card>.agent-info h3{margin-bottom:8px;padding:0;font-size:clamp(14px,4vw,17px);white-space:nowrap;letter-spacing:-.045em}
+  .agents .agent-card>.agent-info span{min-height:0;margin:0;padding:0;font-size:9px;line-height:1.2}
+  .agents .agent-card>.agent-info p{margin-top:6px;font-size:9px;line-height:1.25}
+  .agents .agent-card>.agent-info small{margin-top:5px;font-size:9px}
+  .agents .agent-social{height:auto;margin:2px 0 12px;gap:5px}
+  .agents .agent-social button{width:34px;height:34px;margin:0}
+  .agents .agent-social button svg{width:15px}
+  .agents .agent-actions{height:auto;gap:5px}
+  .agents .agent-actions button{min-height:38px;margin:0;padding:0 4px;font-size:9px}
+  .agents .agent-actions button svg{width:12px}
+  footer{grid-template-columns:auto 1fr;min-height:62px;padding:9px 5%;gap:8px 14px;text-align:left}
+  footer .al7-logo{width:62px;height:40px;margin:0}
+  footer>div:nth-of-type(1){justify-content:flex-end;font-size:9px}
+  footer>small{grid-column:1/3;padding:7px 0 0;border-top:1px solid rgba(255,255,255,.08);font-size:8px;text-align:center}
+}
