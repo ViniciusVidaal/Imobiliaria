@@ -70,11 +70,18 @@ export function PropertyForm({ property }: { property?: Property }) {
       setPendingHref(anchor.href);
       setExitPrompt(true);
     };
+    const detectTabChange = () => {
+      if (document.visibilityState !== "hidden" || allowNavigationRef.current) return;
+      setPendingHref("");
+      setExitPrompt(true);
+    };
     window.addEventListener("beforeunload", beforeUnload);
     document.addEventListener("click", interceptLinks, true);
+    document.addEventListener("visibilitychange", detectTabChange);
     return () => {
       window.removeEventListener("beforeunload", beforeUnload);
       document.removeEventListener("click", interceptLinks, true);
+      document.removeEventListener("visibilitychange", detectTabChange);
     };
   }, [hasChanges]);
 
