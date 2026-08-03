@@ -17,6 +17,22 @@ export function Animations() {
     gsap.to(".hero-visual", { yPercent: 12, scale: 0.94, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.7 } });
     gsap.utils.toArray<HTMLElement>(".section-head").forEach((head) => gsap.from(head.children, { y: 54, opacity: 0, filter: "blur(8px)", stagger: 0.1, scrollTrigger: { trigger: head, start: "top 78%", once: true } }));
     gsap.utils.toArray<HTMLElement>(".property-card,.metric,.service-card,.agent-card,.testimonial-stage").forEach((element, index) => gsap.from(element, { y: 70, opacity: 0, scale: 0.94, rotateX: 8, delay: (index % 4) * 0.05, scrollTrigger: { trigger: element, start: "top 84%", once: true } }));
+    gsap.utils.toArray<HTMLElement>(".metric strong").forEach((number) => {
+      const original = number.textContent?.trim() || "0";
+      const target = Number.parseInt(original.replace(/\D/g, ""), 10);
+      const suffix = original.replace(/[\d.,\s]/g, "");
+      const counter = { value: 0 };
+
+      number.textContent = `0${suffix}`;
+      gsap.to(counter, {
+        value: target,
+        duration: 2,
+        ease: "power2.out",
+        snap: { value: 1 },
+        onUpdate: () => { number.textContent = `${Math.round(counter.value)}${suffix}`; },
+        scrollTrigger: { trigger: number, start: "top 88%", once: true },
+      });
+    });
     gsap.utils.toArray<HTMLElement>(".split").forEach((row) => gsap.from(row.children, { x: (index) => index === 0 ? -70 : 70, opacity: 0, filter: "blur(7px)", stagger: 0.16, scrollTrigger: { trigger: row, start: "top 78%", once: true } }));
     gsap.utils.toArray<HTMLElement>(".btn,.fab").forEach((button) => {
       button.addEventListener("mouseenter", () => gsap.to(button, { scale: 1.06, duration: 0.22 }));
