@@ -6,6 +6,7 @@ import { Bath, Bed, BedDouble, CalendarDays, CarFront, MapPin, Maximize, Message
 import { Header } from "@/components/Header";
 import { Fabs } from "@/components/Fabs";
 import { PropertyGallery } from "@/components/PropertyGallery";
+import { VisitModal } from "@/components/VisitModal";
 import { subscribeProperties } from "@/lib/properties";
 import { money } from "@/lib/constants";
 import type { Property } from "@/lib/types";
@@ -13,6 +14,7 @@ import type { Property } from "@/lib/types";
 export default function PropertyPage() {
   const { slug } = useParams<{ slug: string }>();
   const [property, setProperty] = useState<Property | null>();
+  const [visitOpen, setVisitOpen] = useState(false);
 
   useEffect(() => subscribeProperties((items) => setProperty(items.find((item) => item.slug === slug || item.id === slug) || null)), [slug]);
 
@@ -51,7 +53,7 @@ export default function PropertyPage() {
 
           <div className="detail-primary-actions">
             <button className="btn primary"><MessageCircle /> Falar com um agente</button>
-            <button className="btn visit"><CalendarDays /> Solicitar visita</button>
+            <button className="btn visit" onClick={() => setVisitOpen(true)}><CalendarDays /> Solicitar visita</button>
           </div>
 
           <h2>Sobre este imóvel</h2>
@@ -62,11 +64,12 @@ export default function PropertyPage() {
           <span>Gostou deste imóvel?</span>
           <h2>Agende uma visita.</h2>
           <p>Nossa equipe entra em contato para esclarecer suas dúvidas e encontrar o melhor horário.</p>
-          <button className="btn primary"><CalendarDays /> Solicitar uma visita</button>
+          <button className="btn primary" onClick={() => setVisitOpen(true)}><CalendarDays /> Solicitar uma visita</button>
           <small>Código do imóvel: {property.id.slice(0, 8).toUpperCase()}</small>
         </aside>
       </section>
     </main>
     <Fabs />
+    <VisitModal open={visitOpen} propertyTitle={property.title} propertyCode={property.id.slice(0, 8).toUpperCase()} onClose={() => setVisitOpen(false)} />
   </>;
 }
