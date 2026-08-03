@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <div className="admin-brand"><Logo/><div><b>AL7 Gestão</b><small>{profile.name || user.email}</small><em>{profile.role === "ceo" ? "CEO" : "Agente"}</em></div></div>
       <nav>{links.filter((link) => !link.ceoOnly || profile.role === "ceo").map(({ href, label, icon: Icon }) => <Link href={href} key={href} className={pathname === href || (href !== "/admin" && pathname.startsWith(href)) ? "active" : ""} onClick={() => setMenuOpen(false)}><Icon />{label}</Link>)}</nav>
       <Link href="/" className="admin-back-site"><ArrowLeft /> Voltar para o site</Link>
-      <button className="admin-logout" onClick={() => signOut(auth)}><LogOut /> Sair do painel</button>
+      <button className="admin-logout" data-unsaved-action="logout" onClick={() => signOut(auth)}><LogOut /> Sair do painel</button>
     </aside>
     <button className="admin-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir navegação">{menuOpen ? <X/> : <Menu/>}</button>
     <Link href="/" className="admin-site-mobile"><ArrowLeft /> Voltar ao site</Link>

@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useState } from "react";
-import { ImageIcon, Plus, Star, Trash2, Upload } from "lucide-react";
+import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
+import { ImageIcon, Plus, Save, Star, Trash2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LOCATIONS, PROPERTY_TYPES } from "@/lib/constants";
 import { saveProperty } from "@/lib/properties";
@@ -10,6 +10,8 @@ import { deleteCloudinaryImages, uploadPropertyImages } from "@/lib/upload";
 import { addAudit } from "@/lib/admin";
 import type { Property } from "@/lib/types";
 import { CurrencyInput } from "@/components/CurrencyInput";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
 
@@ -20,12 +22,61 @@ export function PropertyForm({ property }: { property?: Property }) {
   const [newMain, setNewMain] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
+  const [ready, setReady] = useState(false);
+  const [exitPrompt, setExitPrompt] = useState(false);
+  const [pendingHref, setPendingHref] = useState("");
+  const baselineRef = useRef("");
+  const allowNavigationRef = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (!property) return setForm(blankProperty);
+    if (!property) {
+      setForm(blankProperty);
+      baselineRef.current = JSON.stringify(blankProperty);
+      setReady(true);
+      return;
+    }
     const { id: _, ...data } = property;
-    setForm({ ...blankProperty, ...data, suites: data.suites ?? 0 });
+    const initialForm = { ...blankProperty, ...data, suites: data.suites ?? 0 };
+    setForm(initialForm);
+    baselineRef.current = JSON.stringify(initialForm);
+    setReady(true);
   }, [property]);
+
+  const hasChanges = Boolean(property) && ready && (JSON.stringify(form) !== baselineRef.current || files.length > 0 || newMain);
+
+  useEffect(() => {
+    if (!hasChanges) return;
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (allowNavigationRef.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const interceptLinks = (event: MouseEvent) => {
+      if (allowNavigationRef.current || event.button !== 0) return;
+      const target = event.target as Element | null;
+      const logout = target?.closest('[data-unsaved-action="logout"]');
+      if (logout) {
+        event.preventDefault();
+        event.stopPropagation();
+        setPendingHref("__logout__");
+        setExitPrompt(true);
+        return;
+      }
+      const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!anchor || anchor.target === "_blank" || anchor.href === window.location.href) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPendingHref(anchor.href);
+      setExitPrompt(true);
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+    document.addEventListener("click", interceptLinks, true);
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnload);
+      document.removeEventListener("click", interceptLinks, true);
+    };
+  }, [hasChanges]);
 
   function setMain(index: number) {
     setForm((current) => ({ ...current, images: [current.images[index], ...current.images.filter((_, itemIndex) => itemIndex !== index)] }));
@@ -48,14 +99,32 @@ export function PropertyForm({ property }: { property?: Property }) {
         await deleteCloudinaryImages(removedImages);
       }
       await addAudit(property ? "Imóvel editado" : "Imóvel cadastrado", `${form.title} · Código ${id.slice(0,8).toUpperCase()}`);
-      if (property) router.push("/admin/imoveis");
+      if (property) {
+        allowNavigationRef.current = true;
+        baselineRef.current = JSON.stringify(data);
+        if (pendingHref === "__logout__") await signOut(auth);
+        else if (pendingHref) window.location.assign(pendingHref);
+        else router.push("/admin/imoveis");
+      }
       else { setForm(blankProperty); setFiles([]); setNewMain(false); setNotice("Imóvel cadastrado com sucesso."); }
     } catch (error) {
       setNotice(`Não foi possível salvar: ${error instanceof Error ? error.message : "erro inesperado"}`);
     } finally { setBusy(false); }
   }
 
-  return <form className="property-form admin-panel" onSubmit={submit}>
+  async function discardAndLeave() {
+    allowNavigationRef.current = true;
+    if (pendingHref === "__logout__") await signOut(auth);
+    else window.location.assign(pendingHref || "/admin/imoveis");
+  }
+
+  function saveAndLeave(event: ReactMouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    setExitPrompt(false);
+    formRef.current?.requestSubmit();
+  }
+
+  return <><form ref={formRef} className="property-form admin-panel" onSubmit={submit}>
     <div className="admin-page-head"><div className="admin-head-icon"><Plus/></div><div><span>{property ? "Edição" : "Novo cadastro"}</span><h1>{property ? "Editar imóvel" : "Cadastrar imóvel"}</h1><p>Preencha as informações e organize as fotos do anúncio.</p></div></div>
     <div className="fields">
       <label className="wide">Título<input value={form.title} onChange={(e)=>setForm({...form,title:e.target.value})} required placeholder="Ex.: Casa contemporânea no Lago Sul"/></label>
@@ -75,5 +144,5 @@ export function PropertyForm({ property }: { property?: Property }) {
     </div>
     <div className="form-actions"><button className="admin-btn" disabled={busy}>{busy?"Processando...":property?"Salvar alterações":"Cadastrar imóvel"}</button></div>
     {notice&&<p className="notice">{notice}</p>}
-  </form>;
+  </form>{exitPrompt && <div className="unsaved-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setExitPrompt(false)}}><section className="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsaved-title"><div className="unsaved-icon"><Save/></div><span>Alterações pendentes</span><h2 id="unsaved-title">Deseja salvar antes de sair?</h2><p>Você alterou informações deste imóvel. Escolha salvar as mudanças ou descartá-las antes de continuar.</p><div><button type="button" className="admin-btn" onClick={saveAndLeave}>Salvar alterações</button><button type="button" className="discard-changes" onClick={discardAndLeave}>Descartar</button><button type="button" className="keep-editing" onClick={()=>setExitPrompt(false)}>Continuar editando</button></div></section></div>}</>;
 }
