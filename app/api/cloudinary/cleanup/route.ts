@@ -1,21 +1,9 @@
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { getActiveAdmin } from "@/lib/server-auth";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-async function isAuthenticated(request: NextRequest) {
-  const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDEZvX8PtJkHK5o--xzVc6BOgyzriaXais";
-  if (!token) return false;
-  const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idToken: token }),
-    cache: "no-store",
-  });
-  return response.ok;
-}
 
 function publicIdFromUrl(imageUrl: string, cloudName: string) {
   try {
@@ -27,7 +15,8 @@ function publicIdFromUrl(imageUrl: string, cloudName: string) {
     if (/^v\d+$/.test(uploadParts[0] || "")) uploadParts.shift();
     if (!uploadParts.length) return null;
     const path = decodeURIComponent(uploadParts.join("/"));
-    return path.replace(/\.[a-zA-Z0-9]+$/, "");
+    const publicId = path.replace(/\.[a-zA-Z0-9]+$/, "");
+    return publicId.startsWith("al7-imoveis/properties/") ? publicId : null;
   } catch {
     return null;
   }
@@ -48,7 +37,7 @@ async function destroyImage(publicId: string, cloudName: string, apiKey: string,
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await isAuthenticated(request))) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  if (!(await getActiveAdmin(request))) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;

@@ -1,31 +1,11 @@
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { getActiveAdmin } from "@/lib/server-auth";
 
 export const runtime = "nodejs";
 
-async function isAuthenticated(request: NextRequest) {
-  const token = request.headers
-    .get("authorization")
-    ?.replace(/^Bearer\s+/i, "");
-  const firebaseApiKey =
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-    "AIzaSyDEZvX8PtJkHK5o--xzVc6BOgyzriaXais";
-  if (!token || !firebaseApiKey) return false;
-
-  const response = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseApiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken: token }),
-      cache: "no-store",
-    },
-  );
-  return response.ok;
-}
-
 export async function POST(request: NextRequest) {
-  if (!(await isAuthenticated(request))) {
+  if (!(await getActiveAdmin(request))) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
