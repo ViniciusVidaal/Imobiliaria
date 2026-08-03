@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 export interface AuditEntry {
@@ -9,6 +9,8 @@ export interface AuditEntry {
   userEmail: string;
   createdAt?: { toDate?: () => Date };
 }
+
+export interface AdminUserProfile { id:string; name:string; email:string; role:string; active:boolean; createdAt?:unknown }
 
 export async function addAudit(action: string, details: string) {
   const user = auth.currentUser;
@@ -35,4 +37,13 @@ export async function verifyRegistrationCode(code: string) {
 
 export async function saveUserProfile(uid: string, name: string, email: string) {
   await setDoc(doc(db, "usuarios", uid), { name, email, role: "agent", active: true, createdAt: serverTimestamp() });
+}
+
+export function subscribeUsers(callback: (users: AdminUserProfile[]) => void) {
+  return onSnapshot(collection(db, "usuarios"), (snapshot) => callback(snapshot.docs.map((item) => ({ id:item.id, ...item.data() } as AdminUserProfile))));
+}
+
+export async function changeRegistrationCode(currentCode: string, newCode: string) {
+  if (!(await verifyRegistrationCode(currentCode))) throw new Error("Senha administrativa atual incorreta.");
+  await updateDoc(doc(db, "configuracoes", "admin"), { codigoCadastro: newCode, updatedAt: serverTimestamp() });
 }
