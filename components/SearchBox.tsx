@@ -4,10 +4,12 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { LOCATIONS, PROPERTY_TYPES } from "@/lib/constants";
+import { CurrencyInput } from "@/components/CurrencyInput";
 
 export function SearchBox() {
   const router = useRouter();
   const [notice, setNotice] = useState("");
+  const [maxPrice, setMaxPrice] = useState(0);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,7 +31,7 @@ export function SearchBox() {
       <label><span>Quartos</span><select name="bedrooms" defaultValue=""><option value="">Quantidade</option><option value="1">1 quarto</option><option value="2">2 quartos</option><option value="3">3 quartos</option><option value="4+">4 ou mais</option></select></label>
       <label><span>Tipo de imóvel</span><select name="type" defaultValue=""><option value="">Todos os tipos</option>{PROPERTY_TYPES.map((item)=><option key={item}>{item}</option>)}</select></label>
       <label><span>Localização</span><select name="location" defaultValue=""><option value="">Todas as regiões</option>{LOCATIONS.map((item)=><option key={item}>{item}</option>)}</select></label>
-      <label><span>Preço até</span><input type="number" name="max" min="1" placeholder="Sem limite"/></label>
+      <label><span>Preço até</span><CurrencyInput name="max" value={maxPrice} onValueChange={setMaxPrice} placeholder="Sem limite"/></label>
       <button className="btn primary"><Search/> Buscar imóveis</button>
     </div>
     {notice && <p className="search-notice" role="alert">{notice}</p>}

@@ -9,6 +9,7 @@ import { saveProperty } from "@/lib/properties";
 import { uploadPropertyImages } from "@/lib/upload";
 import { addAudit } from "@/lib/admin";
 import type { Property } from "@/lib/types";
+import { CurrencyInput } from "@/components/CurrencyInput";
 
 export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
 
@@ -56,7 +57,7 @@ export function PropertyForm({ property }: { property?: Property }) {
       <label>Transação<select value={form.transaction} onChange={(e)=>setForm({...form,transaction:e.target.value as Property["transaction"]})}><option>Compra</option><option>Locação</option></select></label>
       <label>Tipo<select value={form.type} onChange={(e)=>setForm({...form,type:e.target.value})}>{PROPERTY_TYPES.map((item)=><option key={item}>{item}</option>)}</select></label>
       <label className="wide">Localização<select value={form.location} onChange={(e)=>setForm({...form,location:e.target.value})} required>{LOCATIONS.map((item)=><option key={item}>{item}</option>)}</select></label>
-      <label>Preço (R$)<input type="number" min="1" value={form.price} onChange={(e)=>setForm({...form,price:+e.target.value})} required/></label>
+      <label>Preço (R$)<CurrencyInput value={form.price} onValueChange={(price)=>setForm({...form,price})} required/></label>
       <label>Área (m²)<input type="number" min="1" value={form.area} onChange={(e)=>setForm({...form,area:+e.target.value})} required/></label>
       <label>Quartos<input type="number" min="0" value={form.bedrooms} onChange={(e)=>setForm({...form,bedrooms:+e.target.value})} required/></label>
       <label>Banheiros<input type="number" min="0" value={form.bathrooms} onChange={(e)=>setForm({...form,bathrooms:+e.target.value})} required/></label>
