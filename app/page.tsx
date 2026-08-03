@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Building2, Handshake, KeyRound, MapPin, MessageCircle, ShieldCheck, Star } from "lucide-react";
+import { ArrowRight, BadgeCheck, Building2, Handshake, KeyRound, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SearchBox } from "@/components/SearchBox";
 import { LiveProperties } from "@/components/LiveProperties";
@@ -8,6 +8,7 @@ import { Preloader } from "@/components/Preloader";
 import { Fabs } from "@/components/Fabs";
 import { Animations } from "@/components/Animations";
 import { Logo } from "@/components/Logo";
+import { Testimonials } from "@/components/Testimonials";
 
 const agents = [
   { name: "Alex Alane", role: "Avaliador de imóveis · CRECI 6713 DF", img: "/images/imgi_21_imgi_1_409025321_316751504512405_2749448995655283148_n-300x300.png" },
@@ -37,7 +38,7 @@ export default function Home() {
 
     <section id="agentes" className="section agents"><div className="section-head"><span className="eyebrow dark">Nosso time</span><h2>Especialistas que conhecem <em>o seu mercado.</em></h2></div><div className="agent-grid">{agents.map((agent)=><article className="agent-card" key={agent.name}><div><Image src={agent.img} alt={agent.name} fill sizes="(max-width: 768px) 100vw, 25vw"/></div><span>{agent.role}</span><h3>{agent.name}</h3><button><MessageCircle/> Falar com o corretor</button></article>)}</div></section>
 
-    <section className="section testimonials"><div className="section-head"><span className="eyebrow dark">Reputação</span><h2>Confiança se <em>conquista.</em></h2></div><div className="testimonial"><div>{[1,2,3,4,5].map((item)=><Star key={item} fill="currentColor"/>)}</div><blockquote>“Atendimento transparente, rápido e muito cuidadoso. Encontramos o imóvel certo e tivemos segurança do início ao fim.”</blockquote><b>Cliente AL7 Imóveis</b><span>Brasília · Distrito Federal</span></div><div className="dots"><i className="active"/><i/><i/></div></section>
+    <Testimonials />
 
     <section id="contato" className="contact"><div><span className="eyebrow">Atendimento AL7</span><h2>Qual imóvel você <em>procura?</em></h2></div><button className="btn light">Falar com a AL7 <ArrowRight/></button></section>
   </main><footer><Logo large/><p>Imóveis, negócios e decisões bem conduzidas.</p><div><MapPin/> Brasília, Distrito Federal</div><small>© 2026 AL7 Imóveis. Todos os direitos reservados.</small></footer><Fabs/></>;
