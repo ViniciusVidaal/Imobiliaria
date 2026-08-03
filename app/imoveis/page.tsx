@@ -37,15 +37,14 @@ function PropertiesContent() {
   useEffect(() => { void loadPage(null); }, [loadPage]);
 
   const filtered = useMemo(() => items.filter((property) => {
-    const keyword = params.get("keyword")?.toLowerCase();
-    const min = Number(params.get("min") || 0);
+    const bedrooms = params.get("bedrooms");
     const max = Number(params.get("max") || Infinity);
+    const matchesBedrooms = !bedrooms || (bedrooms === "4+" ? property.bedrooms >= 4 : property.bedrooms === Number(bedrooms));
     return !property.sold &&
       (!params.get("transaction") || property.transaction === params.get("transaction")) &&
       (!params.get("type") || property.type === params.get("type")) &&
       (!params.get("location") || property.location === params.get("location")) &&
-      (!keyword || `${property.title} ${property.description}`.toLowerCase().includes(keyword)) &&
-      property.price >= min && property.price <= max;
+      matchesBedrooms && property.price <= max;
   }), [items, params]);
 
   return <><Header/><main className="listing-page"><div className="listing-hero"><span className="eyebrow">Curadoria AL7</span><h1>Encontre o imóvel <em>ideal para você.</em></h1></div><div className="listing-search"><SearchBox/></div><section className="section"><div className="listing-title"><h2>{filtered.length} imóveis carregados</h2></div><div className="property-grid">{filtered.map((property) => <PropertyCard key={property.id} property={property}/>)}</div>{error && <p className="empty-state">{error}</p>}{!loading && !filtered.length && !error && <p className="empty-state">Nenhum imóvel corresponde aos filtros neste lote.</p>}{hasMore && <div className="center"><button className="btn primary" disabled={loading} onClick={() => void loadPage(cursor)}>{loading ? "Carregando..." : "Ver mais imóveis"}</button></div>}</section></main><Fabs/></>;
