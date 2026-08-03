@@ -5,7 +5,9 @@ export const runtime = "nodejs";
 
 async function isAuthenticated(request: NextRequest) {
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  const firebaseApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  const firebaseApiKey =
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+    "AIzaSyDEZvX8PtJkHK5o--xzVc6BOgyzriaXais";
   if (!token || !firebaseApiKey) return false;
 
   const response = await fetch(
