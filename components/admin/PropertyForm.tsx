@@ -6,7 +6,7 @@ import { ImageIcon, Plus, Star, Trash2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LOCATIONS, PROPERTY_TYPES } from "@/lib/constants";
 import { saveProperty } from "@/lib/properties";
-import { uploadPropertyImages } from "@/lib/upload";
+import { deleteCloudinaryImages, uploadPropertyImages } from "@/lib/upload";
 import { addAudit } from "@/lib/admin";
 import type { Property } from "@/lib/types";
 import { CurrencyInput } from "@/components/CurrencyInput";
@@ -42,6 +42,11 @@ export function PropertyForm({ property }: { property?: Property }) {
       const images = newMain && uploaded.length ? [...uploaded, ...form.images] : [...form.images, ...uploaded];
       const data = { ...form, images, slug: form.slug || form.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") };
       const id = await saveProperty(data, property?.id);
+      const removedImages = property?.images.filter((image) => !images.includes(image)) || [];
+      if (removedImages.length) {
+        setNotice("Removendo fotos antigas do Cloudinary...");
+        await deleteCloudinaryImages(removedImages);
+      }
       await addAudit(property ? "Imóvel editado" : "Imóvel cadastrado", `${form.title} · Código ${id.slice(0,8).toUpperCase()}`);
       if (property) router.push("/admin/imoveis");
       else { setForm(blankProperty); setFiles([]); setNewMain(false); setNotice("Imóvel cadastrado com sucesso."); }

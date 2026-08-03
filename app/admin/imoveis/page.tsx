@@ -8,6 +8,7 @@ import { money } from "@/lib/constants";
 import { removeProperty, setSold, subscribeProperties } from "@/lib/properties";
 import { addAudit } from "@/lib/admin";
 import type { Property } from "@/lib/types";
+import { deleteCloudinaryImages } from "@/lib/upload";
 
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 const propertyCode = (property: Property) => property.id.slice(0, 8).toUpperCase();
@@ -41,8 +42,13 @@ export default function RegisteredPropertiesPage() {
   }
   async function remove(property: Property) {
     if (!confirm(`Excluir “${property.title}” permanentemente?`)) return;
-    await removeProperty(property.id);
-    await addAudit("Imóvel excluído", `${property.title} · Código ${propertyCode(property)}`);
+    try {
+      await deleteCloudinaryImages(property.images || []);
+      await removeProperty(property.id);
+      await addAudit("Imóvel excluído", `${property.title} · Código ${propertyCode(property)} · imagens removidas do Cloudinary`);
+    } catch (error) {
+      alert(`Não foi possível concluir a exclusão: ${error instanceof Error ? error.message : "erro inesperado"}`);
+    }
   }
   function selectSuggestion(property: Property) {
     setSearch(property.title);
