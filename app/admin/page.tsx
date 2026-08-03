@@ -23,6 +23,7 @@ import {
 } from "@/lib/properties";
 import { uploadPropertyImages } from "@/lib/upload";
 import type { Property } from "@/lib/types";
+import { LoadTestPanel } from "@/components/LoadTestPanel";
 import "./admin.css";
 const blank = {
   title: "",
@@ -361,6 +362,7 @@ export default function Admin() {
           </div>
         </aside>
       </section>
+      <LoadTestPanel properties={items} />
     </main>
   );
 }
