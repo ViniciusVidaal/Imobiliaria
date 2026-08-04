@@ -31,17 +31,22 @@ export default function RegisteredPropertiesPage() {
 
   async function toggleSold(property: Property) {
     await setSold(property.id, !property.sold);
-    await addAudit(property.sold ? "Imóvel reativado" : "Imóvel marcado como vendido", `${property.title} · Código ${propertyCode(property)}`);
+    await addAudit(property.sold ? "Imóvel reativado" : "Imóvel marcado como vendido", `${property.title} · Código ${propertyCode(property)}`).catch(() => undefined);
   }
   async function remove(property: Property) {
     if (!confirm(`Excluir “${property.title}” permanentemente?`)) return;
     try {
       await removeProperty(property.id);
+      let cleanupError: unknown = null;
       try {
         await deleteCloudinaryImages(property.images || []);
-        await addAudit("Imóvel excluído", `${property.title} · Código ${propertyCode(property)} · imagens removidas do Cloudinary`);
-      } catch (cleanupError) {
-        await addAudit("Imóvel excluído com alerta de imagens", `${property.title} · Código ${propertyCode(property)} · ${cleanupError instanceof Error ? cleanupError.message : "falha no Cloudinary"}`);
+      } catch (error) {
+        cleanupError = error;
+      }
+      const auditAction = cleanupError ? "Imóvel excluído com alerta de imagens" : "Imóvel excluído";
+      const auditDetails = `${property.title} · Código ${propertyCode(property)} · ${cleanupError instanceof Error ? cleanupError.message : "imagens removidas do Cloudinary"}`;
+      await addAudit(auditAction, auditDetails).catch(() => undefined);
+      if (cleanupError) {
         alert("O imóvel foi excluído do site, mas algumas imagens podem ter ficado no Cloudinary. Tente a limpeza novamente pelo suporte.");
       }
     } catch (error) {
