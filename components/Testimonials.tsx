@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Quote, Star } from "lucide-react";
+import { brand } from "@/config/brand";
 
 const testimonials = [
   { text: "Fomos atendidos com muita transparência. Encontramos o imóvel certo e tivemos segurança em todas as etapas.", name: "Mariana S.", context: "Compra de apartamento" },
   { text: "A equipe entendeu exatamente o que procurávamos e apresentou opções realmente compatíveis com a nossa família.", name: "Ricardo M.", context: "Compra de imóvel" },
   { text: "Meu imóvel foi bem apresentado, as visitas foram organizadas e a negociação aconteceu com muita clareza.", name: "Ana Paula R.", context: "Venda de imóvel" },
   { text: "O acompanhamento documental fez toda a diferença. Não tivemos surpresas e recebemos suporte até a entrega das chaves.", name: "Carlos E.", context: "Compra de casa" },
-  { text: "Atendimento rápido, humano e sem pressão. A AL7 tornou uma decisão importante muito mais tranquila.", name: "Fernanda L.", context: "Locação residencial" },
+  { text: `Atendimento rápido, humano e sem pressão. A ${brand.shortName} tornou uma decisão importante muito mais tranquila.`, name: "Fernanda L.", context: "Locação residencial" },
   { text: "Conhecem Brasília de verdade. As orientações sobre localização e valorização foram essenciais para nossa escolha.", name: "Gustavo N.", context: "Investimento imobiliário" },
   { text: "Conseguimos vender com segurança e dentro do cenário que havia sido apresentado desde o início.", name: "Patrícia A.", context: "Venda de apartamento" },
   { text: "Equipe disponível, educada e muito preparada. Cada dúvida foi respondida com objetividade.", name: "Eduardo C.", context: "Compra de terreno" },
@@ -29,7 +30,7 @@ export function Testimonials() {
     <div className="testimonials-intro">
       <span className="eyebrow dark">Depoimentos</span>
       <h2>Experiências que falam <em>por nós.</em></h2>
-      <p>Histórias de quem contou com a AL7 para comprar, vender ou alugar com tranquilidade.</p>
+      <p>Histórias de quem contou com a {brand.shortName} para comprar, vender ou alugar com tranquilidade.</p>
     </div>
     <div className="testimonial-stage" aria-live="polite">
       <Quote className="quote-mark" />

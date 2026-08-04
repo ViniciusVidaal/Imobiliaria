@@ -3,11 +3,12 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
+import { brand } from "@/config/brand";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   return <header className="site-header">
-    <Link href="/" aria-label="AL7 Imóveis"><Logo /></Link>
+    <Link href="/" aria-label={brand.name}><Logo /></Link>
     <nav className={open ? "open" : ""}>
       <Link href="/#imoveis" onClick={() => setOpen(false)}>Imóveis</Link>
       <Link href="/#servicos" onClick={() => setOpen(false)}>Serviços</Link>

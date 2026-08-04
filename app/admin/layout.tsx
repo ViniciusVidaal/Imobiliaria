@@ -8,6 +8,7 @@ import { ArrowLeft, Building2, History, LogOut, Menu, PlusCircle, UserPlus, X } 
 import { auth } from "@/lib/firebase";
 import { AdminUserProfile, subscribeCurrentProfile } from "@/lib/admin";
 import { Logo } from "@/components/Logo";
+import { brand } from "@/config/brand";
 import "./admin.css";
 
 const links = [
@@ -46,12 +47,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   if (user === undefined || (user && profile === undefined)) return <main className="admin-loading">Carregando painel...</main>;
-  if (!user) return <main className="login-page"><form className="login-card" onSubmit={login}><Logo large/><span>Área restrita</span><h1>Painel administrativo</h1><p>Entre para gerenciar os imóveis da AL7.</p><label>E-mail<input name="email" type="email" autoComplete="email" required /></label><label>Senha<input name="password" type="password" autoComplete="current-password" required /></label>{notice && <p className="notice">{notice}</p>}<button className="admin-btn">Entrar no painel</button></form></main>;
+  if (!user) return <main className="login-page"><form className="login-card" onSubmit={login}><Logo large/><span>Área restrita</span><h1>Painel administrativo</h1><p>Entre para gerenciar os imóveis da {brand.shortName}.</p><label>E-mail<input name="email" type="email" autoComplete="email" required /></label><label>Senha<input name="password" type="password" autoComplete="current-password" required /></label>{notice && <p className="notice">{notice}</p>}<button className="admin-btn">Entrar no painel</button></form></main>;
   if (!profile || !profile.active) return <main className="login-page"><section className="login-card"><Logo large/><span>Acesso bloqueado</span><h1>Usuário sem permissão</h1><p>Seu acesso foi removido ou ainda não foi autorizado pelo CEO.</p><button className="admin-btn" onClick={() => signOut(auth)}>Voltar ao login</button></section></main>;
 
   return <div className="admin-app">
     <aside className={`admin-sidebar ${menuOpen ? "open" : ""}`}>
-      <div className="admin-brand"><Logo/><div><b>AL7 Gestão</b><small>{profile.name || user.email}</small><em>{profile.role === "ceo" ? "CEO" : "Agente"}</em></div></div>
+      <div className="admin-brand"><Logo/><div><b>{brand.managementName}</b><small>{profile.name || user.email}</small><em>{profile.role === "ceo" ? "CEO" : "Agente"}</em></div></div>
       <nav>{links.filter((link) => !link.ceoOnly || profile.role === "ceo").map(({ href, label, icon: Icon }) => <Link href={href} key={href} className={pathname === href || (href !== "/admin" && pathname.startsWith(href)) ? "active" : ""} onClick={() => setMenuOpen(false)}><Icon />{label}</Link>)}</nav>
       <Link href="/" className="admin-back-site"><ArrowLeft /> Voltar para o site</Link>
       <button className="admin-logout" data-unsaved-action="logout" onClick={() => signOut(auth)}><LogOut /> Sair do painel</button>

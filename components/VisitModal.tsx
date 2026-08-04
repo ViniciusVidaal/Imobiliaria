@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { CheckCircle2, Send, X } from "lucide-react";
 import { whatsappUrl } from "@/lib/contact";
+import { brand } from "@/config/brand";
 
 interface VisitModalProps {
   open: boolean;
@@ -62,7 +63,7 @@ export function VisitModal({ open, propertyTitle, propertyCode, onClose }: Visit
         <CheckCircle2 />
         <span>Solicitação enviada</span>
         <h2>Obrigado por agendar sua visita!</h2>
-        <p>O WhatsApp foi aberto com os dados preenchidos. Envie a mensagem para que a equipe AL7 confirme o horário.</p>
+        <p>O WhatsApp foi aberto com os dados preenchidos. Envie a mensagem para que a equipe {brand.shortName} confirme o horário.</p>
         <button className="btn primary" type="button" onClick={onClose}>Voltar ao imóvel</button>
       </div> : <>
         <p className="visit-intro" id="visit-title">Escolha o melhor dia e horário. Nossa equipe confirmará a disponibilidade pelo WhatsApp.</p>

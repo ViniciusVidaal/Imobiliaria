@@ -8,6 +8,7 @@ import { SearchBox } from "@/components/SearchBox";
 import { Fabs } from "@/components/Fabs";
 import { getFilteredPropertiesPage, type PropertyFilters } from "@/lib/properties";
 import type { Property } from "@/lib/types";
+import { brand } from "@/config/brand";
 
 const PAGE_SIZE = 12;
 
@@ -45,7 +46,7 @@ function PropertiesContent() {
 
   const filtered = useMemo(() => items, [items]);
 
-  return <><Header/><main className="listing-page"><div className="listing-hero"><span className="eyebrow">Curadoria AL7</span><h1>Encontre o imóvel <em>ideal para você.</em></h1></div><div className="listing-search"><SearchBox/></div><section className="section"><div className="listing-title"><h2>{filtered.length} imóveis carregados</h2></div><div className="property-grid">{filtered.map((property) => <PropertyCard key={property.id} property={property}/>)}</div>{error && <p className="empty-state">{error}</p>}{!loading && !filtered.length && !error && <p className="empty-state">Nenhum imóvel corresponde aos filtros neste lote.</p>}{hasMore && <div className="center"><button className="btn primary" disabled={loading} onClick={() => void loadPage(cursor)}>{loading ? "Carregando..." : "Ver mais imóveis"}</button></div>}</section></main><Fabs/></>;
+  return <><Header/><main className="listing-page"><div className="listing-hero"><span className="eyebrow">Curadoria {brand.shortName}</span><h1>Encontre o imóvel <em>ideal para você.</em></h1></div><div className="listing-search"><SearchBox/></div><section className="section"><div className="listing-title"><h2>{filtered.length} imóveis carregados</h2></div><div className="property-grid">{filtered.map((property) => <PropertyCard key={property.id} property={property}/>)}</div>{error && <p className="empty-state">{error}</p>}{!loading && !filtered.length && !error && <p className="empty-state">Nenhum imóvel corresponde aos filtros neste lote.</p>}{hasMore && <div className="center"><button className="btn primary" disabled={loading} onClick={() => void loadPage(cursor)}>{loading ? "Carregando..." : "Ver mais imóveis"}</button></div>}</section></main><Fabs/></>;
 }
 
 export default function PropertiesPage() {
