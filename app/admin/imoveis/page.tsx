@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Edit3, Eye, Home, MapPin, Search, Trash2, X } from "lucide-react";
+import { Edit3, Eye, Home, MapPin, Search, Trash2, X } from "lucide-react";
 import { LOCATIONS, money } from "@/lib/constants";
-import { removeProperty, setSold, subscribeProperties } from "@/lib/properties";
+import { removeProperty, subscribeProperties } from "@/lib/properties";
 import { addAudit } from "@/lib/admin";
 import type { Property } from "@/lib/types";
 import { deleteCloudinaryImages } from "@/lib/upload";
@@ -31,17 +31,6 @@ export default function RegisteredPropertiesPage() {
     });
   }, [items, search, selectedLocation]);
 
-  async function toggleSold(property: Property) {
-    try {
-      await setSold(property.id, !property.sold);
-      await addAudit(property.sold ? "Imóvel reativado" : "Imóvel marcado como vendido", `${property.title} · Código ${propertyCode(property)}`).catch(() => undefined);
-      setSuccess(property.sold
-        ? { title:"Imóvel reativado!", message:`${property.title} voltou a aparecer como disponível no catálogo.` }
-        : { title:"Imóvel marcado como vendido!", message:`${property.title} foi atualizado e não aparecerá mais como disponível.` });
-    } catch (error) {
-      alert(`Não foi possível atualizar o imóvel: ${error instanceof Error ? error.message : "erro inesperado"}`);
-    }
-  }
   async function remove(property: Property) {
     if (!confirm(`Excluir “${property.title}” permanentemente?`)) return;
     try {
@@ -78,7 +67,7 @@ export default function RegisteredPropertiesPage() {
     <div className="admin-property-grid">{filteredItems.map((property)=><article className="admin-property-card" key={property.id}>
       <div className="admin-property-image"><Image src={property.images?.[0]||"/images/imgi_46_IMG_1143-1-scaled.jpg"} alt={property.title} fill sizes="(max-width: 700px) 50vw, 33vw"/><span>{property.sold?"Vendido":property.transaction}</span></div>
       <div className="admin-property-copy"><small>{property.type} · {neighborhood(property)}</small><h2>{property.title}</h2><strong>{money(property.price)}</strong><p>Código {propertyCode(property)}</p></div>
-      <div className="admin-card-actions"><Link href={`/imovel/${property.slug||property.id}`} target="_blank" title="Ver no site"><Eye/></Link><Link href={`/admin/imoveis/${property.id}/editar`} title="Editar"><Edit3/></Link><button onClick={()=>toggleSold(property)} title={property.sold?"Reativar":"Marcar como vendido"}><CheckCircle2/></button><button className="danger" onClick={()=>remove(property)} title="Excluir"><Trash2/></button></div>
+      <div className="admin-card-actions"><Link href={`/imovel/${property.slug||property.id}`} target="_blank" title="Ver no site"><Eye/></Link><Link href={`/admin/imoveis/${property.id}/editar`} title="Editar"><Edit3/></Link><button className="danger" onClick={()=>remove(property)} title="Excluir"><Trash2/></button></div>
     </article>)}</div>
     {!filteredItems.length&&<div className="admin-empty"><Search/><h2>{items.length ? "Nenhum imóvel encontrado" : "Nenhum imóvel cadastrado"}</h2><p>{items.length ? "Tente outro título, código ou localização." : "Cadastre o primeiro imóvel para começar."}</p>{!items.length&&<Link href="/admin" className="admin-btn">Cadastrar primeiro imóvel</Link>}</div>}
   </section>{success&&<AdminSuccessModal title={success.title} message={success.message} onClose={()=>setSuccess(null)}/>}</>;

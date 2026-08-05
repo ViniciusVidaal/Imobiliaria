@@ -3,7 +3,7 @@
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { inMemoryPersistence, onAuthStateChanged, setPersistence, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
+import { browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
 import { ArrowLeft, Building2, History, LogOut, Menu, PlusCircle, UserPlus, X } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { AdminUserProfile, subscribeCurrentProfile } from "@/lib/admin";
@@ -30,16 +30,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     let unsubscribe = () => {};
     let active = true;
 
-    async function requireFreshLogin() {
+    async function restoreSession() {
       try {
-        await setPersistence(auth, inMemoryPersistence);
-        await signOut(auth);
+        await setPersistence(auth, browserLocalPersistence);
       } finally {
         if (active) unsubscribe = onAuthStateChanged(auth, setUser);
       }
     }
 
-    void requireFreshLogin();
+    void restoreSession();
     return () => { active = false; unsubscribe(); };
   }, []);
   useEffect(() => {

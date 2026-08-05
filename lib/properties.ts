@@ -64,6 +64,10 @@ const mapProperty = (snapshot: QueryDocumentSnapshot | DocumentSnapshot) => {
     images: data.images || data.fotos || [],
     featured: Boolean(data.featured ?? data.destaque ?? false),
     sold: Boolean(data.sold ?? data.vendido ?? data.ativo === false),
+    agentId: String(data.agentId || ""),
+    agentName: String(data.agentName || ""),
+    agentWhatsapp: String(data.agentWhatsapp || ""),
+    agentCreci: String(data.agentCreci || ""),
     createdAt: data.createdAt || data.dataCadastro,
     updatedAt: data.updatedAt || data.dataAtualizacao,
   } as Property;

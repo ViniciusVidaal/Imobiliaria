@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { LOCATIONS, PROPERTY_TYPES } from "@/lib/constants";
 import { saveProperty } from "@/lib/properties";
 import { deleteCloudinaryImages, uploadPropertyImages } from "@/lib/upload";
-import { addAudit } from "@/lib/admin";
+import { addAudit, AdminUserProfile, subscribeUsers } from "@/lib/admin";
 import type { Property } from "@/lib/types";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { signOut } from "firebase/auth";
@@ -15,7 +15,7 @@ import { auth } from "@/lib/firebase";
 import { normalizeStoredPropertyType, propertyTypeRequiresRooms } from "@/lib/property-form-rules";
 import { AdminSuccessModal } from "@/components/admin/AdminSuccessModal";
 
-export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
+export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false, agentId:"", agentName:"", agentWhatsapp:"", agentCreci:"" };
 
 export function PropertyForm({ property }: { property?: Property }) {
   const router = useRouter();
@@ -27,11 +27,14 @@ export function PropertyForm({ property }: { property?: Property }) {
   const [ready, setReady] = useState(false);
   const [exitPrompt, setExitPrompt] = useState(false);
   const [success, setSuccess] = useState<{ title: string; message: string; redirect?: string } | null>(null);
+  const [agents, setAgents] = useState<AdminUserProfile[]>([]);
   const [pendingHref, setPendingHref] = useState("");
   const baselineRef = useRef("");
   const allowNavigationRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
   const requiresRooms = propertyTypeRequiresRooms(form.type);
+
+  useEffect(() => subscribeUsers((items) => setAgents(items.filter((item) => item.active))), []);
 
   useEffect(() => {
     if (!property) {
@@ -104,6 +107,7 @@ export function PropertyForm({ property }: { property?: Property }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!form.agentId) return setNotice("Selecione o agente responsável pelo imóvel.");
     if (!form.title.trim()) return setNotice("Informe um título válido.");
     if (!form.description.trim()) return setNotice("Informe uma descrição válida.");
     if (form.price <= 0 || form.area <= 0) return setNotice("Preço e área devem ser maiores que zero.");
@@ -179,6 +183,7 @@ export function PropertyForm({ property }: { property?: Property }) {
   return <><form ref={formRef} className="property-form admin-panel" onSubmit={submit} noValidate>
     <div className="admin-page-head"><div className="admin-head-icon"><Plus/></div><div><span>{property ? "Edição" : "Novo cadastro"}</span><h1>{property ? "Editar imóvel" : "Cadastrar imóvel"}</h1><p>Preencha as informações e organize as fotos do anúncio.</p></div></div>
     <div className="fields">
+      <label className="wide">Agente responsável<select value={form.agentId||""} onChange={(event)=>{const selected=agents.find((item)=>item.id===event.target.value);setForm({...form,agentId:selected?.id||"",agentName:selected?.name||"",agentWhatsapp:selected?.whatsapp||"",agentCreci:selected?.creci||""});}}><option value="">Selecione o agente</option>{agents.map((agent)=><option value={agent.id} key={agent.id}>{agent.name}{agent.creci?` · CRECI ${agent.creci}`:""}</option>)}</select></label>
       <label className="wide">Título<input value={form.title} onChange={(e)=>setForm({...form,title:e.target.value})} required placeholder="Ex.: Casa contemporânea no Lago Sul"/></label>
       <label>Transação<select value={form.transaction} onChange={(e)=>setForm({...form,transaction:e.target.value as Property["transaction"]})}><option>Compra</option><option>Locação</option></select></label>
       <label>Tipo<select value={form.type} onChange={(e)=>setForm({...form,type:e.target.value})}>{PROPERTY_TYPES.map((item)=><option key={item}>{item}</option>)}</select></label>

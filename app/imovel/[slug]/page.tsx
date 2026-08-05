@@ -10,6 +10,7 @@ import { VisitModal } from "@/components/VisitModal";
 import { subscribeProperty } from "@/lib/properties";
 import { money } from "@/lib/constants";
 import type { Property } from "@/lib/types";
+import { whatsappUrl } from "@/lib/contact";
 
 export default function PropertyPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -22,6 +23,7 @@ export default function PropertyPage() {
   if (!property) return <><Header /><div className="detail-loading"><h1>Imóvel não encontrado</h1><p>Este anúncio pode ter sido removido ou vendido.</p></div></>;
 
   const photos = property.images?.length ? property.images : ["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1800&q=85"];
+  const helpMessage = `Olá, vi o imóvel ${property.title} (código ${property.id.slice(0, 8).toUpperCase()}) e gostaria de ajuda.`;
 
   return <>
     <Header />
@@ -53,7 +55,7 @@ export default function PropertyPage() {
           </div>
 
           <div className="detail-primary-actions">
-            <button className="btn primary"><MessageCircle /> Falar com um agente</button>
+            <a className="btn primary" href={whatsappUrl(helpMessage, property.agentWhatsapp)} target="_blank" rel="noreferrer"><MessageCircle /> Falar com um agente</a>
             <button className="btn visit" onClick={() => setVisitOpen(true)}><CalendarDays /> Solicitar visita</button>
           </div>
 
@@ -71,6 +73,6 @@ export default function PropertyPage() {
       </section>
     </main>
     <Fabs />
-    <VisitModal open={visitOpen} propertyTitle={property.title} propertyCode={property.id.slice(0, 8).toUpperCase()} onClose={() => setVisitOpen(false)} />
+    <VisitModal open={visitOpen} propertyTitle={property.title} propertyCode={property.id.slice(0, 8).toUpperCase()} agentWhatsapp={property.agentWhatsapp} onClose={() => setVisitOpen(false)} />
   </>;
 }

@@ -3,9 +3,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { getApps, initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, deleteUser, EmailAuthProvider, getAuth, reauthenticateWithCredential, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
-import { KeyRound, Mail, ShieldCheck, Trash2, UserPlus, Users } from "lucide-react";
+import { KeyRound, Mail, Pencil, ShieldCheck, Trash2, UserPlus, Users, X } from "lucide-react";
 import { auth, firebaseConfig } from "@/lib/firebase";
-import { addAudit, AdminRole, AdminUserProfile, findUserByEmail, reactivateUser, removeAgent, saveUserProfile, subscribeCurrentProfile, subscribeUsers } from "@/lib/admin";
+import { addAudit, AdminRole, AdminUserProfile, findUserByEmail, reactivateUser, removeAgent, saveUserProfile, subscribeCurrentProfile, subscribeUsers, updateUserProfile } from "@/lib/admin";
 import { AdminSuccessModal } from "@/components/admin/AdminSuccessModal";
 
 export default function UsersPage() {
@@ -17,6 +17,7 @@ export default function UsersPage() {
   const [notice, setNotice] = useState("");
   const [success, setSuccess] = useState<{ title:string; message:string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUserProfile | null>(null);
   const activeUsers = users.filter((user) => user.active);
 
   useEffect(() => auth.currentUser ? subscribeCurrentProfile(auth.currentUser.uid, (profile) => setIsCEO(profile?.role === "ceo" && profile.active)) : undefined, []);
@@ -61,8 +62,10 @@ export default function UsersPage() {
       createdUser = credential.user;
       const name = String(data.get("name")).trim();
       const role = String(data.get("role")) as AdminRole;
+      const whatsapp = String(data.get("whatsapp")||"");
+      const creci = String(data.get("creci")||"");
       await updateProfile(credential.user, { displayName: name });
-      await saveUserProfile(credential.user.uid, name, email, role);
+      await saveUserProfile(credential.user.uid, name, email, role, whatsapp, creci);
       profileSaved = true;
       await signOut(secondaryAuth).catch(() => undefined);
       const auditSaved = await addAudit("Usuário cadastrado", `${name} · ${email} · ${role === "ceo" ? "CEO" : "Agente"}`).then(()=>true).catch(()=>false);
@@ -72,12 +75,14 @@ export default function UsersPage() {
       const email = String(data.get("email")).trim().toLowerCase();
       const name = String(data.get("name")).trim();
       const role = String(data.get("role")) as AdminRole;
+      const whatsapp = String(data.get("whatsapp")||"");
+      const creci = String(data.get("creci")||"");
       if (createdUser && !profileSaved) await deleteUser(createdUser).catch(() => undefined);
       if (code === "auth/email-already-in-use") {
         const existing = await findUserByEmail(email).catch(() => null);
         if (existing?.active) setNotice("Este e-mail já possui um acesso ativo no painel.");
         else if (existing) {
-          await reactivateUser(existing, name, role);
+          await reactivateUser(existing, name, role, whatsapp, creci);
           auth.languageCode = "pt-BR";
           const resetSent = await sendPasswordResetEmail(auth, email).then(()=>true).catch(()=>false);
           await addAudit("Usuário reativado", `${name} · ${email} · redefinição de senha ${resetSent ? "enviada" : "pendente"}`).catch(()=>undefined);
@@ -87,7 +92,7 @@ export default function UsersPage() {
           try {
             const recovered = await signInWithEmailAndPassword(secondaryAuth, email, String(data.get("password")));
             await updateProfile(recovered.user, { displayName: name });
-            await saveUserProfile(recovered.user.uid, name, email, role);
+            await saveUserProfile(recovered.user.uid, name, email, role, whatsapp, creci);
             await signOut(secondaryAuth);
             await addAudit("Conta órfã recuperada", `${name} · ${email} · perfil ${role}`);
             form.reset();
@@ -114,12 +119,27 @@ export default function UsersPage() {
     finally { setBusy(false); }
   }
 
+  async function editUser(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingUser) return;
+    setBusy(true); setNotice("");
+    const data = new FormData(event.currentTarget);
+    try {
+      const changes = { name:String(data.get("name")), contactEmail:String(data.get("contactEmail")), whatsapp:String(data.get("whatsapp")), creci:String(data.get("creci")), role:String(data.get("role")) as AdminRole };
+      await updateUserProfile(editingUser, changes);
+      await addAudit("Usuário editado", `${changes.name} · ${editingUser.email}`);
+      setEditingUser(null);
+      setSuccess({ title:"Usuário atualizado!", message:"As informações do perfil e dos imóveis vinculados foram atualizadas com sucesso." });
+    } catch (error) { setNotice(`Não foi possível atualizar: ${error instanceof Error ? error.message : "erro inesperado"}`); }
+    finally { setBusy(false); }
+  }
+
   if (!authorized) return <section className="admin-panel admin-gate"><div className="gate-icon"><KeyRound/></div><span>Acesso exclusivo do CEO</span><h1>Cadastrar usuário</h1><p>{recovery ? "Digite o mesmo e-mail CEO usado para entrar no painel. Você receberá o link oficial do Firebase." : "Confirme a senha da sua conta CEO para continuar."}</p>{recovery ? <>{!recoverySent&&<form onSubmit={recover}><label>E-mail do CEO<input name="email" type="email" required autoFocus/></label><button className="admin-btn" disabled={busy}>{busy?"Enviando...":"Enviar link de redefinição"}</button></form>}{recoverySent&&<button className="admin-btn" type="button" onClick={()=>signOut(auth)}>Voltar ao login</button>}</> : <form onSubmit={unlock}><label>Senha da conta CEO<input name="password" type="password" required autoFocus autoComplete="current-password"/></label><button className="admin-btn" disabled={busy}>{busy?"Verificando...":"Liberar acesso"}</button></form>}<button className="forgot-area-password" type="button" onClick={() => { setRecovery(!recovery); setRecoverySent(false); setNotice(""); }}>{recovery ? "Voltar para a senha" : "Esqueci minha senha"}</button>{notice&&<p className="notice" role="status">{notice}</p>}</section>;
 
   return <><div className="users-admin-page">
-    <section className="admin-panel user-register"><div className="admin-page-head"><div className="admin-head-icon"><UserPlus/></div><div><span>Equipe</span><h1>Cadastrar usuário</h1><p>Crie um acesso com o nível correto de permissão.</p></div></div><div className="security-note"><ShieldCheck/><p>CEO gerencia usuários e agentes. Agente gerencia imóveis, mas não acessa esta área.</p></div><form className="fields" onSubmit={register}><label className="wide">Nome completo<input name="name" required autoComplete="name"/></label><label>E-mail<input name="email" type="email" required autoComplete="email"/></label><label>Senha inicial<input name="password" type="password" minLength={6} required autoComplete="new-password"/></label><label className="wide">Tipo de perfil<select name="role" defaultValue="agent" required><option value="agent">Agente</option><option value="ceo">CEO</option></select></label><div className="form-actions wide"><button className="admin-btn" disabled={busy}>{busy?"Cadastrando...":"Cadastrar usuário"}</button></div></form></section>
+    <section className="admin-panel user-register"><div className="admin-page-head"><div className="admin-head-icon"><UserPlus/></div><div><span>Equipe</span><h1>Cadastrar usuário</h1><p>Crie um acesso com o nível correto de permissão.</p></div></div><div className="security-note"><ShieldCheck/><p>CEO gerencia usuários e agentes. Agente gerencia imóveis, mas não acessa esta área.</p></div><form className="fields" onSubmit={register}><label className="wide">Nome completo<input name="name" required autoComplete="name"/></label><label>E-mail de login<input name="email" type="email" required autoComplete="email"/></label><label>Senha inicial<input name="password" type="password" minLength={6} required autoComplete="new-password"/></label><label>WhatsApp <small>opcional</small><input name="whatsapp" type="tel" inputMode="numeric" placeholder="(61) 99999-9999" autoComplete="tel"/></label><label>CRECI <small>opcional</small><input name="creci" placeholder="Ex.: 12345 DF"/></label><label className="wide">Tipo de perfil<select name="role" defaultValue="agent" required><option value="agent">Agente</option><option value="ceo">CEO</option></select></label><div className="form-actions wide"><button className="admin-btn" disabled={busy}>{busy?"Cadastrando...":"Cadastrar usuário"}</button></div></form></section>
 
-    <section className="admin-panel users-list"><div className="admin-page-head"><div className="admin-head-icon"><Users/></div><div><span>Acessos</span><h1>Usuários cadastrados</h1><p>{activeUsers.length} acesso(s) ativo(s) no painel.</p></div></div><div>{activeUsers.map((user)=><article key={user.id}><div className="user-avatar">{user.name?.charAt(0).toUpperCase()||"A"}</div><div><b>{user.name} <i className={`role-badge ${user.role}`}>{user.role === "ceo" ? "CEO" : "Agente"}</i></b><span>{user.email}</span><small>Senha: ••••••••</small></div><div className="user-actions"><button onClick={()=>resetPassword(user)}><Mail/> Redefinir senha</button>{user.role !== "ceo" && <button className="danger" disabled={busy} onClick={()=>deleteAgent(user)}><Trash2/> Desativar agente</button>}</div></article>)}</div>{!activeUsers.length&&<p className="admin-empty">Nenhum usuário ativo cadastrado.</p>}</section>
+    <section className="admin-panel users-list"><div className="admin-page-head"><div className="admin-head-icon"><Users/></div><div><span>Acessos</span><h1>Usuários cadastrados</h1><p>{activeUsers.length} acesso(s) ativo(s) no painel.</p></div></div><div>{activeUsers.map((user)=><article key={user.id}><div className="user-avatar">{user.name?.charAt(0).toUpperCase()||"A"}</div><div><b>{user.name} <i className={`role-badge ${user.role}`}>{user.role === "ceo" ? "CEO" : "Agente"}</i></b><span>{user.email}</span><small>{user.creci?`CRECI ${user.creci} · `:""}{user.whatsapp||"WhatsApp não informado"}</small></div><div className="user-actions"><button onClick={()=>setEditingUser(user)}><Pencil/> Editar</button><button onClick={()=>resetPassword(user)}><Mail/> Redefinir senha</button>{user.role !== "ceo" && <button className="danger" disabled={busy} onClick={()=>deleteAgent(user)}><Trash2/> Desativar agente</button>}</div></article>)}</div>{!activeUsers.length&&<p className="admin-empty">Nenhum usuário ativo cadastrado.</p>}</section>
     {notice&&<p className="notice users-notice">{notice}</p>}
-  </div>{success&&<AdminSuccessModal title={success.title} message={success.message} onClose={()=>setSuccess(null)}/>}</>;
+  </div>{editingUser&&<div className="unsaved-backdrop" role="presentation"><section className="unsaved-dialog user-edit-dialog" role="dialog" aria-modal="true"><button className="edit-user-close" type="button" onClick={()=>setEditingUser(null)} aria-label="Fechar"><X/></button><span>Editar acesso</span><h2>{editingUser.name}</h2><form className="fields" onSubmit={editUser}><label className="wide">Nome completo<input name="name" defaultValue={editingUser.name} required/></label><label className="wide">E-mail de login<input value={editingUser.email} disabled/><small>Para trocar o login, o próprio usuário deve confirmar o novo e-mail pelo Firebase.</small></label><label className="wide">E-mail de contato<input name="contactEmail" type="email" defaultValue={editingUser.contactEmail||editingUser.email} required/></label><label>WhatsApp <small>opcional</small><input name="whatsapp" type="tel" defaultValue={editingUser.whatsapp||""}/></label><label>CRECI <small>opcional</small><input name="creci" defaultValue={editingUser.creci||""}/></label><label className="wide">Perfil<select name="role" defaultValue={editingUser.role}><option value="agent">Agente</option><option value="ceo">CEO</option></select></label><div className="form-actions wide"><button className="admin-btn" disabled={busy}>{busy?"Salvando...":"Salvar alterações"}</button></div></form></section></div>}{success&&<AdminSuccessModal title={success.title} message={success.message} onClose={()=>setSuccess(null)}/>}</>;
 }

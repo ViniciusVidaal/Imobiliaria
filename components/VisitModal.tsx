@@ -9,6 +9,7 @@ interface VisitModalProps {
   open: boolean;
   propertyTitle: string;
   propertyCode: string;
+  agentWhatsapp?: string;
   onClose: () => void;
 }
 
@@ -18,7 +19,7 @@ function today() {
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
-export function VisitModal({ open, propertyTitle, propertyCode, onClose }: VisitModalProps) {
+export function VisitModal({ open, propertyTitle, propertyCode, agentWhatsapp, onClose }: VisitModalProps) {
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export function VisitModal({ open, propertyTitle, propertyCode, onClose }: Visit
       data.get("message") ? `Mensagem: ${data.get("message")}` : "",
     ].filter(Boolean).join("\n");
 
-    window.open(whatsappUrl(message), "_blank", "noopener,noreferrer");
+    window.open(whatsappUrl(message, agentWhatsapp), "_blank", "noopener,noreferrer");
     setSent(true);
   }
 
