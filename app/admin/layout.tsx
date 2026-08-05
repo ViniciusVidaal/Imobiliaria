@@ -72,7 +72,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <Link href="/" className="admin-back-site"><ArrowLeft /> Voltar para o site</Link>
       <button className="admin-logout" data-unsaved-action="logout" onClick={() => signOut(auth)}><LogOut /> Sair do painel</button>
     </aside>
-    <button className="admin-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir navegação">{menuOpen ? <X/> : <Menu/>}</button>
+    <button className={`admin-menu ${menuOpen ? "is-open" : ""}`} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? "Fechar navegação" : "Abrir navegação"}>{menuOpen ? <X/> : <Menu/>}</button>
     <Link href="/" className="admin-site-mobile"><ArrowLeft /> Voltar ao site</Link>
     {menuOpen && <button className="admin-menu-backdrop" onClick={() => setMenuOpen(false)} aria-label="Fechar navegação"/>}
     <main className="admin-content">{children}</main>
