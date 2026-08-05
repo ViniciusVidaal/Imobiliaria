@@ -12,23 +12,9 @@ import type { Property } from "@/lib/types";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { normalizeStoredPropertyType, propertyTypeRequiresRooms } from "@/lib/property-form-rules";
 
 export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
-
-const TYPES_WITH_OPTIONAL_ROOMS = new Set(["terreno", "lote", "loja comercial", "fazenda", "sitio", "chacara"]);
-
-function normalizePropertyType(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
-}
-
-function normalizeStoredPropertyType(value: string) {
-  const normalized = normalizePropertyType(value || "");
-  if (["lote", "terreno"].includes(normalized)) return "Terreno";
-  if (["loja", "loja comercial", "loja/ponto comercial", "sala comercial", "conjunto comercial/sala"].includes(normalized)) return "Loja comercial";
-  if (["fazenda", "sitio", "fazenda/sitio"].includes(normalized)) return "Fazenda";
-  if (normalized === "chacara") return "Chácara";
-  return PROPERTY_TYPES.find((type) => normalizePropertyType(type) === normalized) || PROPERTY_TYPES[0];
-}
 
 export function PropertyForm({ property }: { property?: Property }) {
   const router = useRouter();
@@ -44,7 +30,7 @@ export function PropertyForm({ property }: { property?: Property }) {
   const baselineRef = useRef("");
   const allowNavigationRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const requiresRooms = !TYPES_WITH_OPTIONAL_ROOMS.has(normalizePropertyType(form.type));
+  const requiresRooms = propertyTypeRequiresRooms(form.type);
 
   useEffect(() => {
     if (!property) {
