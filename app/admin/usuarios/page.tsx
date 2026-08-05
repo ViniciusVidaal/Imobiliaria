@@ -2,15 +2,16 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { getApps, initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, deleteUser, getAuth, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, deleteUser, EmailAuthProvider, getAuth, reauthenticateWithCredential, sendPasswordResetEmail, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import { KeyRound, Mail, ShieldCheck, Trash2, UserPlus, Users } from "lucide-react";
 import { auth, firebaseConfig } from "@/lib/firebase";
-import { addAudit, AdminRole, AdminUserProfile, findUserByEmail, reactivateUser, recoverUserAreaAccess, removeAgent, saveUserProfile, subscribeCurrentProfile, subscribeUsers, verifyRegistrationCode } from "@/lib/admin";
+import { addAudit, AdminRole, AdminUserProfile, findUserByEmail, reactivateUser, removeAgent, saveUserProfile, subscribeCurrentProfile, subscribeUsers } from "@/lib/admin";
 import { AdminSuccessModal } from "@/components/admin/AdminSuccessModal";
 
 export default function UsersPage() {
   const [authorized, setAuthorized] = useState(false);
   const [recovery, setRecovery] = useState(false);
+  const [recoverySent, setRecoverySent] = useState(false);
   const [isCEO, setIsCEO] = useState(false);
   const [users, setUsers] = useState<AdminUserProfile[]>([]);
   const [notice, setNotice] = useState("");
@@ -23,18 +24,27 @@ export default function UsersPage() {
 
   async function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setNotice("");
-    try { const code = String(new FormData(event.currentTarget).get("code")); if (isCEO && await verifyRegistrationCode(code)) setAuthorized(true); else setNotice("Senha administrativa incorreta ou perfil sem permissão."); }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Não foi possível validar a senha."); }
+    try {
+      const current = auth.currentUser;
+      const password = String(new FormData(event.currentTarget).get("password"));
+      if (!isCEO || !current?.email) return setNotice("Perfil sem permissão para acessar esta área.");
+      await reauthenticateWithCredential(current, EmailAuthProvider.credential(current.email, password));
+      setAuthorized(true);
+    } catch { setNotice("Senha da conta CEO incorreta."); }
     finally { setBusy(false); }
   }
 
   async function recover(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setNotice("");
     try {
-      const email = String(new FormData(event.currentTarget).get("email"));
-      if (await recoverUserAreaAccess(email)) { setAuthorized(true); setRecovery(false); setSuccess({ title:"Acesso recuperado!", message:"Sua identidade CEO foi confirmada e a área de usuários está liberada." }); }
-      else setNotice("Este e-mail não pertence ao CEO conectado.");
-    } catch { setNotice("Não foi possível confirmar o perfil CEO."); }
+      const current = auth.currentUser;
+      const email = String(new FormData(event.currentTarget).get("email")).trim().toLowerCase();
+      if (!isCEO || !current?.email || current.email.toLowerCase() !== email) return setNotice("Informe o mesmo e-mail CEO usado para entrar no painel.");
+      auth.languageCode = "pt-BR";
+      await sendPasswordResetEmail(auth, current.email);
+      setRecoverySent(true);
+      setNotice("Enviamos o link de redefinição para o seu e-mail. A área continua bloqueada até você criar uma nova senha e entrar novamente.");
+    } catch { setNotice("Não foi possível enviar o e-mail de redefinição. Tente novamente."); }
     finally { setBusy(false); }
   }
 
@@ -104,7 +114,7 @@ export default function UsersPage() {
     finally { setBusy(false); }
   }
 
-  if (!authorized) return <section className="admin-panel admin-gate"><div className="gate-icon"><KeyRound/></div><span>Acesso exclusivo do CEO</span><h1>Cadastrar usuário</h1><p>{recovery ? "Digite o mesmo e-mail CEO usado para entrar no painel." : "Informe a senha administrativa para continuar."}</p>{recovery ? <form onSubmit={recover}><label>E-mail do CEO<input name="email" type="email" required autoFocus/></label><button className="admin-btn" disabled={busy}>{busy?"Confirmando...":"Recuperar acesso"}</button></form> : <form onSubmit={unlock}><label>Senha administrativa<input name="code" type="password" required autoFocus/></label><button className="admin-btn" disabled={busy}>{busy?"Verificando...":"Liberar acesso"}</button></form>}<button className="forgot-area-password" type="button" onClick={() => { setRecovery(!recovery); setNotice(""); }}>{recovery ? "Voltar para a senha" : "Esqueci minha senha"}</button>{notice&&<p className="notice">{notice}</p>}</section>;
+  if (!authorized) return <section className="admin-panel admin-gate"><div className="gate-icon"><KeyRound/></div><span>Acesso exclusivo do CEO</span><h1>Cadastrar usuário</h1><p>{recovery ? "Digite o mesmo e-mail CEO usado para entrar no painel. Você receberá o link oficial do Firebase." : "Confirme a senha da sua conta CEO para continuar."}</p>{recovery ? <>{!recoverySent&&<form onSubmit={recover}><label>E-mail do CEO<input name="email" type="email" required autoFocus/></label><button className="admin-btn" disabled={busy}>{busy?"Enviando...":"Enviar link de redefinição"}</button></form>}{recoverySent&&<button className="admin-btn" type="button" onClick={()=>signOut(auth)}>Voltar ao login</button>}</> : <form onSubmit={unlock}><label>Senha da conta CEO<input name="password" type="password" required autoFocus autoComplete="current-password"/></label><button className="admin-btn" disabled={busy}>{busy?"Verificando...":"Liberar acesso"}</button></form>}<button className="forgot-area-password" type="button" onClick={() => { setRecovery(!recovery); setRecoverySent(false); setNotice(""); }}>{recovery ? "Voltar para a senha" : "Esqueci minha senha"}</button>{notice&&<p className="notice" role="status">{notice}</p>}</section>;
 
   return <><div className="users-admin-page">
     <section className="admin-panel user-register"><div className="admin-page-head"><div className="admin-head-icon"><UserPlus/></div><div><span>Equipe</span><h1>Cadastrar usuário</h1><p>Crie um acesso com o nível correto de permissão.</p></div></div><div className="security-note"><ShieldCheck/><p>CEO gerencia usuários e agentes. Agente gerencia imóveis, mas não acessa esta área.</p></div><form className="fields" onSubmit={register}><label className="wide">Nome completo<input name="name" required autoComplete="name"/></label><label>E-mail<input name="email" type="email" required autoComplete="email"/></label><label>Senha inicial<input name="password" type="password" minLength={6} required autoComplete="new-password"/></label><label className="wide">Tipo de perfil<select name="role" defaultValue="agent" required><option value="agent">Agente</option><option value="ceo">CEO</option></select></label><div className="form-actions wide"><button className="admin-btn" disabled={busy}>{busy?"Cadastrando...":"Cadastrar usuário"}</button></div></form></section>
