@@ -15,6 +15,12 @@ import { auth } from "@/lib/firebase";
 
 export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
 
+const TYPES_WITH_OPTIONAL_ROOMS = new Set(["terreno", "loja comercial", "fazenda", "chacara"]);
+
+function normalizePropertyType(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+}
+
 export function PropertyForm({ property }: { property?: Property }) {
   const router = useRouter();
   const [form, setForm] = useState<Omit<Property, "id">>(blankProperty);
@@ -28,7 +34,7 @@ export function PropertyForm({ property }: { property?: Property }) {
   const baselineRef = useRef("");
   const allowNavigationRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const requiresRooms = !["Terreno", "Loja comercial", "Fazenda", "Chácara"].includes(form.type);
+  const requiresRooms = !TYPES_WITH_OPTIONAL_ROOMS.has(normalizePropertyType(form.type));
 
   useEffect(() => {
     if (!property) {
@@ -104,6 +110,7 @@ export function PropertyForm({ property }: { property?: Property }) {
     if (!form.title.trim()) return setNotice("Informe um título válido.");
     if (!form.description.trim()) return setNotice("Informe uma descrição válida.");
     if (form.price <= 0 || form.area <= 0) return setNotice("Preço e área devem ser maiores que zero.");
+    if (requiresRooms && (form.bedrooms <= 0 || form.bathrooms <= 0)) return setNotice("Informe a quantidade de quartos e banheiros para este tipo de imóvel.");
     if (!form.images.length && !files.length) return setNotice("Adicione pelo menos uma foto do imóvel.");
     if (form.images.length + files.length > 30) return setNotice("Cada imóvel pode ter no máximo 30 fotos.");
     setBusy(true);
@@ -157,8 +164,8 @@ export function PropertyForm({ property }: { property?: Property }) {
       <label className="wide">Localização<select value={form.location} onChange={(e)=>setForm({...form,location:e.target.value})} required>{LOCATIONS.map((item)=><option key={item}>{item}</option>)}</select></label>
       <label>Preço (R$)<CurrencyInput value={form.price} onValueChange={(price)=>setForm({...form,price})} required/></label>
       <label>Área (m²)<input type="number" min="1" value={form.area || ""} onChange={(e)=>setForm({...form,area:+e.target.value})} required/></label>
-      <label>Quartos{!requiresRooms && <small>opcional para este tipo</small>}<input type="number" min="0" value={form.bedrooms || ""} onChange={(e)=>setForm({...form,bedrooms:+e.target.value})} required={requiresRooms}/></label>
-      <label>Banheiros{!requiresRooms && <small>opcional para este tipo</small>}<input type="number" min="0" value={form.bathrooms || ""} onChange={(e)=>setForm({...form,bathrooms:+e.target.value})} required={requiresRooms}/></label>
+      <label>Quartos{!requiresRooms && <small>opcional para este tipo</small>}<input type="number" min="0" value={form.bedrooms || ""} onChange={(e)=>setForm({...form,bedrooms:+e.target.value})}/></label>
+      <label>Banheiros{!requiresRooms && <small>opcional para este tipo</small>}<input type="number" min="0" value={form.bathrooms || ""} onChange={(e)=>setForm({...form,bathrooms:+e.target.value})}/></label>
       <label>Suítes<input type="number" min="0" value={form.suites || ""} onChange={(e)=>setForm({...form,suites:+e.target.value})}/></label>
       <label>Vagas<input type="number" min="0" value={form.parking || ""} onChange={(e)=>setForm({...form,parking:+e.target.value})}/></label>
       <label className="wide">Descrição<textarea rows={6} value={form.description} onChange={(e)=>setForm({...form,description:e.target.value})} required/></label>
