@@ -28,6 +28,7 @@ export function PropertyForm({ property }: { property?: Property }) {
   const baselineRef = useRef("");
   const allowNavigationRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const requiresRooms = !["Terreno", "Loja comercial", "Fazenda", "Chácara"].includes(form.type);
 
   useEffect(() => {
     if (!property) {
@@ -156,8 +157,8 @@ export function PropertyForm({ property }: { property?: Property }) {
       <label className="wide">Localização<select value={form.location} onChange={(e)=>setForm({...form,location:e.target.value})} required>{LOCATIONS.map((item)=><option key={item}>{item}</option>)}</select></label>
       <label>Preço (R$)<CurrencyInput value={form.price} onValueChange={(price)=>setForm({...form,price})} required/></label>
       <label>Área (m²)<input type="number" min="1" value={form.area || ""} onChange={(e)=>setForm({...form,area:+e.target.value})} required/></label>
-      <label>Quartos<input type="number" min="0" value={form.bedrooms || ""} onChange={(e)=>setForm({...form,bedrooms:+e.target.value})} required/></label>
-      <label>Banheiros<input type="number" min="0" value={form.bathrooms || ""} onChange={(e)=>setForm({...form,bathrooms:+e.target.value})} required/></label>
+      <label>Quartos{!requiresRooms && <small>opcional para este tipo</small>}<input type="number" min="0" value={form.bedrooms || ""} onChange={(e)=>setForm({...form,bedrooms:+e.target.value})} required={requiresRooms}/></label>
+      <label>Banheiros{!requiresRooms && <small>opcional para este tipo</small>}<input type="number" min="0" value={form.bathrooms || ""} onChange={(e)=>setForm({...form,bathrooms:+e.target.value})} required={requiresRooms}/></label>
       <label>Suítes<input type="number" min="0" value={form.suites || ""} onChange={(e)=>setForm({...form,suites:+e.target.value})}/></label>
       <label>Vagas<input type="number" min="0" value={form.parking || ""} onChange={(e)=>setForm({...form,parking:+e.target.value})}/></label>
       <label className="wide">Descrição<textarea rows={6} value={form.description} onChange={(e)=>setForm({...form,description:e.target.value})} required/></label>
