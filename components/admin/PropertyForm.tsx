@@ -176,7 +176,7 @@ export function PropertyForm({ property }: { property?: Property }) {
     if (redirect) router.push(redirect);
   }
 
-  return <><form ref={formRef} className="property-form admin-panel" onSubmit={submit}>
+  return <><form ref={formRef} className="property-form admin-panel" onSubmit={submit} noValidate>
     <div className="admin-page-head"><div className="admin-head-icon"><Plus/></div><div><span>{property ? "Edição" : "Novo cadastro"}</span><h1>{property ? "Editar imóvel" : "Cadastrar imóvel"}</h1><p>Preencha as informações e organize as fotos do anúncio.</p></div></div>
     <div className="fields">
       <label className="wide">Título<input value={form.title} onChange={(e)=>setForm({...form,title:e.target.value})} required placeholder="Ex.: Casa contemporânea no Lago Sul"/></label>
@@ -194,7 +194,7 @@ export function PropertyForm({ property }: { property?: Property }) {
       <label className="upload wide"><Upload/><b>Adicionar imagens *</b><span>Obrigatório adicionar pelo menos uma foto e permitido no máximo 30. Elas serão comprimidas e convertidas para WebP.</span><input type="file" accept="image/*" multiple required={!form.images.length} onChange={(e)=>{const chosen=Array.from(e.target.files||[]);const available=Math.max(0,30-form.images.length);const selected=chosen.slice(0,available);setFiles(selected);setNotice(chosen.length>available?`Somente ${available} foto(s) foram aceitas. O limite total é 30.`:selected.length?`${selected.length} arquivo(s) selecionado(s).`:"");}}/>{files.length>0&&<em>{files.length} nova(s) foto(s)</em>}</label>
       {property && files.length>0 && <label className="main-new wide"><input type="checkbox" checked={newMain} onChange={(e)=>setNewMain(e.target.checked)}/> Usar a primeira nova imagem como foto principal</label>}
     </div>
-    <div className="form-actions"><button className="admin-btn" disabled={busy}>{busy?"Processando...":property?"Salvar alterações":"Cadastrar imóvel"}</button></div>
-    {notice&&<p className="notice">{notice}</p>}
+    <div className="form-actions"><button type="submit" className="admin-btn" disabled={busy}>{busy?"Processando...":property?"Salvar alterações":"Cadastrar imóvel"}</button></div>
+    {notice&&<p className="notice" role="status" aria-live="polite">{notice}</p>}
   </form>{exitPrompt && <div className="unsaved-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setExitPrompt(false)}}><section className="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsaved-title"><div className="unsaved-icon"><Save/></div><span>Alterações pendentes</span><h2 id="unsaved-title">Deseja salvar antes de sair?</h2><p>Você alterou informações deste imóvel. Escolha salvar as mudanças ou descartá-las antes de continuar.</p><div><button type="button" className="admin-btn" onClick={saveAndLeave}>Salvar alterações</button><button type="button" className="discard-changes" onClick={discardAndLeave}>Descartar</button><button type="button" className="keep-editing" onClick={()=>setExitPrompt(false)}>Continuar editando</button></div></section></div>}{success && <AdminSuccessModal title={success.title} message={success.message} onClose={closeSuccess}/>}</>;
 }
