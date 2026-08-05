@@ -44,7 +44,7 @@ export function PropertyForm({ property }: { property?: Property }) {
     setForm(initialForm);
     baselineRef.current = JSON.stringify(initialForm);
     setReady(true);
-  }, [property]);
+  }, [property?.id]);
 
   const hasChanges = ready && (JSON.stringify(form) !== baselineRef.current || files.length > 0 || newMain);
 
