@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Building2, Handshake, Instagram, KeyRound, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { ArrowRight, BadgeCheck, Building2, Handshake, KeyRound, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { Header } from "@/components/Header";
 import { SearchBox } from "@/components/SearchBox";
 import { LiveProperties } from "@/components/LiveProperties";
@@ -38,7 +38,7 @@ export default function Home() {
 
     <section id="sobre" className="section split"><div className="split-media"><Image src="/images/imgi_59_IMG_11061-scaled.jpg" alt={`Escritório ${brand.name}`} fill sizes="(max-width: 768px) 100vw, 50vw"/></div><div className="split-copy"><span className="eyebrow dark">Desde {brand.foundedYear}</span><h2>Brasília é o nosso <em>endereço.</em></h2><p>Há mais de 30 anos, a {brand.shortName} ajuda famílias, investidores e proprietários a tomar decisões imobiliárias melhores. Sem pressão. Sem letra miúda. Com gente de verdade acompanhando tudo.</p><ul><li><BadgeCheck/> Corretores certificados</li><li><BadgeCheck/> Negociação transparente</li><li><BadgeCheck/> Suporte jurídico e documental</li></ul><a href="#contato" className="btn primary">Conhecer a {brand.shortName}</a></div></section>
 
-    <section id="agentes" className="section agents"><div className="section-head"><span className="eyebrow dark">Agentes em destaque</span><h2>Nosso <em>time.</em></h2><p>Profissionais preparados para orientar cada etapa da sua negociação.</p></div><div className="agent-grid">{agents.map((agent)=><article className="agent-card" key={agent.name}><div className="agent-photo"><Image src={agent.img} alt={agent.name} fill sizes="(max-width: 768px) 46vw, 25vw"/></div><div className="agent-info"><h3>{agent.name}</h3><span>CRECI: {agent.creci}</span><p>{agent.specialty}</p>{agent.cnai&&<small>CNAI: {agent.cnai}</small>}</div><div className="agent-social"><button aria-label={`Instagram de ${agent.name}`}><Instagram/></button><button aria-label={`WhatsApp de ${agent.name}`}><MessageCircle/></button></div><div className="agent-actions"><button><MessageCircle/> Falar</button><button><Phone/> Ligar</button></div></article>)}</div></section>
+    <section id="agentes" className="section agents"><div className="section-head"><span className="eyebrow dark">Agentes em destaque</span><h2>Nosso <em>time.</em></h2><p>Profissionais preparados para orientar cada etapa da sua negociação.</p></div><div className="agent-grid">{agents.map((agent)=><article className="agent-card" key={agent.name}><div className="agent-photo"><Image src={agent.img} alt={agent.name} fill sizes="(max-width: 768px) 46vw, 25vw"/></div><div className="agent-info"><h3>{agent.name}</h3><span>CRECI: {agent.creci}</span><p>{agent.specialty}</p>{agent.cnai&&<small>CNAI: {agent.cnai}</small>}</div><div className="agent-actions"><button><MessageCircle/> Falar</button><button><Phone/> Ligar</button></div></article>)}</div></section>
 
     <Testimonials />
 

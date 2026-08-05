@@ -27,17 +27,14 @@ h1,h2,h3{font-family:var(--font-display),sans-serif;font-weight:650;letter-spaci
 @media(max-width:520px){.hero h1{font-size:44px}.section-head h2,.split-copy h2{font-size:39px}.agents .agent-card>div{height:180px}.testimonial-stage blockquote{font-size:22px}}
 
 /* Equipe AL7 */
-.agent-card{display:flex;flex-direction:column;min-height:535px;padding:22px 18px 18px;text-align:center}
+.agent-card{display:flex;flex-direction:column;min-height:470px;padding:22px 18px 18px;text-align:center}
 .agent-card>.agent-photo{position:relative;width:180px;height:180px;margin:0 auto 24px;overflow:hidden;border-radius:10px}
 .agent-card>.agent-photo img{object-fit:cover}
-.agent-card>.agent-info{height:auto;min-height:138px;padding:0;text-align:center}
+.agent-card>.agent-info{display:flex;flex:1;flex-direction:column;align-items:center;height:auto;min-height:145px;padding:0 4px;text-align:center}
 .agent-card>.agent-info h3{margin:0 0 12px;padding:0;color:var(--red);font-size:27px;line-height:1;white-space:nowrap}
 .agent-card>.agent-info span{margin:0;padding:0;color:var(--ink);font-size:13px;font-weight:700;letter-spacing:0;text-transform:none}
 .agent-card>.agent-info p{margin:8px 0 0;font-size:13px;line-height:1.35}
 .agent-card>.agent-info small{display:block;margin-top:7px;font-size:12px}
-.agent-social{height:auto!important;display:flex;justify-content:center;gap:7px;margin:4px 0 22px}
-.agent-social button{width:42px;height:42px;margin:0;display:grid;place-items:center;border:0;border-radius:7px;background:var(--red);color:#fff;cursor:pointer}
-.agent-social button svg{width:18px}
 .agent-actions{height:auto!important;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
 .agent-actions button{min-height:46px;margin:0;justify-content:center;border:0;border-radius:8px;background:var(--red);color:#fff;font-size:12px;font-weight:800;text-transform:none;cursor:pointer}
 .agent-actions button svg{width:15px}
@@ -49,16 +46,13 @@ footer>small{grid-column:auto;padding:0;border:0;color:rgba(255,255,255,.48);fon
 
 @media(max-width:768px){
   #sobre .split-media{display:none}
-  .agents .agent-card{min-height:390px;padding:10px 7px 8px}
+  .agents .agent-card{min-height:318px;padding:10px 7px 8px}
   .agents .agent-card>.agent-photo{width:118px;height:118px;margin:5px auto 14px;border-radius:8px}
-  .agents .agent-card>.agent-info{height:auto;min-height:108px;padding:0 2px}
+  .agents .agent-card>.agent-info{height:auto;min-height:104px;padding:0 2px}
   .agents .agent-card>.agent-info h3{margin-bottom:8px;padding:0;font-size:clamp(14px,4vw,17px);white-space:nowrap;letter-spacing:-.045em}
   .agents .agent-card>.agent-info span{min-height:0;margin:0;padding:0;font-size:9px;line-height:1.2}
   .agents .agent-card>.agent-info p{margin-top:6px;font-size:9px;line-height:1.25}
   .agents .agent-card>.agent-info small{margin-top:5px;font-size:9px}
-  .agents .agent-social{height:auto;margin:2px 0 12px;gap:5px}
-  .agents .agent-social button{width:34px;height:34px;margin:0}
-  .agents .agent-social button svg{width:15px}
   .agents .agent-actions{height:auto;gap:5px}
   .agents .agent-actions button{min-height:38px;margin:0;padding:0 4px;font-size:9px}
   .agents .agent-actions button svg{width:12px}
