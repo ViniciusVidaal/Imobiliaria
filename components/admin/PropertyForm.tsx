@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
-import { ImageIcon, Plus, Save, Star, Trash2, Upload } from "lucide-react";
+import { CheckCircle2, ImageIcon, Plus, Save, Star, Trash2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LOCATIONS, PROPERTY_TYPES } from "@/lib/constants";
 import { saveProperty } from "@/lib/properties";
@@ -39,6 +39,7 @@ export function PropertyForm({ property }: { property?: Property }) {
   const [notice, setNotice] = useState("");
   const [ready, setReady] = useState(false);
   const [exitPrompt, setExitPrompt] = useState(false);
+  const [success, setSuccess] = useState<{ title: string; message: string; redirect?: string } | null>(null);
   const [pendingHref, setPendingHref] = useState("");
   const baselineRef = useRef("");
   const allowNavigationRef = useRef(false);
@@ -139,13 +140,31 @@ export function PropertyForm({ property }: { property?: Property }) {
       if (property) {
         allowNavigationRef.current = true;
         baselineRef.current = JSON.stringify(data);
-        if (warnings.length) window.alert(`Alterações salvas. ${warnings.join(" ")}`);
+        setForm(data);
+        setFiles([]);
+        setNewMain(false);
         if (pendingHref === "__logout__") await signOut(auth);
         else if (pendingHref === "__back__") window.history.go(-2);
         else if (pendingHref) window.location.assign(pendingHref);
-        else router.push("/admin/imoveis");
+        else {
+          allowNavigationRef.current = false;
+          setSuccess({
+            title: "Imóvel atualizado com sucesso!",
+            message: warnings.length ? `As alterações foram salvas. ${warnings.join(" ")}` : "Todas as alterações foram salvas e já estão disponíveis no site.",
+            redirect: "/admin/imoveis",
+          });
+        }
       }
-      else { setForm(blankProperty); setFiles([]); setNewMain(false); setNotice(warnings.length ? `Imóvel cadastrado. ${warnings.join(" ")}` : "Imóvel cadastrado com sucesso."); }
+      else {
+        setForm(blankProperty);
+        setFiles([]);
+        setNewMain(false);
+        setNotice("");
+        setSuccess({
+          title: "Imóvel cadastrado com sucesso!",
+          message: warnings.length ? `O anúncio foi publicado. ${warnings.join(" ")}` : "O anúncio foi salvo e já está disponível no catálogo.",
+        });
+      }
     } catch (error) {
       setNotice(`Não foi possível salvar: ${error instanceof Error ? error.message : "erro inesperado"}`);
     } finally { setBusy(false); }
@@ -162,6 +181,12 @@ export function PropertyForm({ property }: { property?: Property }) {
     event.preventDefault();
     setExitPrompt(false);
     formRef.current?.requestSubmit();
+  }
+
+  function closeSuccess() {
+    const redirect = success?.redirect;
+    setSuccess(null);
+    if (redirect) router.push(redirect);
   }
 
   return <><form ref={formRef} className="property-form admin-panel" onSubmit={submit}>
@@ -184,5 +209,5 @@ export function PropertyForm({ property }: { property?: Property }) {
     </div>
     <div className="form-actions"><button className="admin-btn" disabled={busy}>{busy?"Processando...":property?"Salvar alterações":"Cadastrar imóvel"}</button></div>
     {notice&&<p className="notice">{notice}</p>}
-  </form>{exitPrompt && <div className="unsaved-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setExitPrompt(false)}}><section className="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsaved-title"><div className="unsaved-icon"><Save/></div><span>Alterações pendentes</span><h2 id="unsaved-title">Deseja salvar antes de sair?</h2><p>Você alterou informações deste imóvel. Escolha salvar as mudanças ou descartá-las antes de continuar.</p><div><button type="button" className="admin-btn" onClick={saveAndLeave}>Salvar alterações</button><button type="button" className="discard-changes" onClick={discardAndLeave}>Descartar</button><button type="button" className="keep-editing" onClick={()=>setExitPrompt(false)}>Continuar editando</button></div></section></div>}</>;
+  </form>{exitPrompt && <div className="unsaved-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setExitPrompt(false)}}><section className="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsaved-title"><div className="unsaved-icon"><Save/></div><span>Alterações pendentes</span><h2 id="unsaved-title">Deseja salvar antes de sair?</h2><p>Você alterou informações deste imóvel. Escolha salvar as mudanças ou descartá-las antes de continuar.</p><div><button type="button" className="admin-btn" onClick={saveAndLeave}>Salvar alterações</button><button type="button" className="discard-changes" onClick={discardAndLeave}>Descartar</button><button type="button" className="keep-editing" onClick={()=>setExitPrompt(false)}>Continuar editando</button></div></section></div>}{success && <div className="unsaved-backdrop save-success-backdrop" role="presentation"><section className="unsaved-dialog save-success-dialog" role="dialog" aria-modal="true" aria-labelledby="save-success-title"><div className="save-success-icon"><CheckCircle2/></div><span>Operação concluída</span><h2 id="save-success-title">{success.title}</h2><p>{success.message}</p><div><button type="button" className="admin-btn" onClick={closeSuccess}>Continuar</button></div></section></div>}</>;
 }
