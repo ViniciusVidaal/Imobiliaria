@@ -9,6 +9,7 @@ import { removeProperty, setSold, subscribeProperties } from "@/lib/properties";
 import { addAudit } from "@/lib/admin";
 import type { Property } from "@/lib/types";
 import { deleteCloudinaryImages } from "@/lib/upload";
+import { AdminSuccessModal } from "@/components/admin/AdminSuccessModal";
 
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 const propertyCode = (property: Property) => property.id.slice(0, 8).toUpperCase();
@@ -18,6 +19,7 @@ export default function RegisteredPropertiesPage() {
   const [items, setItems] = useState<Property[]>([]);
   const [search, setSearch] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [success, setSuccess] = useState<{ title:string; message:string } | null>(null);
   useEffect(() => subscribeProperties(setItems), []);
 
   const filteredItems = useMemo(() => {
@@ -30,8 +32,15 @@ export default function RegisteredPropertiesPage() {
   }, [items, search, selectedLocation]);
 
   async function toggleSold(property: Property) {
-    await setSold(property.id, !property.sold);
-    await addAudit(property.sold ? "Imóvel reativado" : "Imóvel marcado como vendido", `${property.title} · Código ${propertyCode(property)}`).catch(() => undefined);
+    try {
+      await setSold(property.id, !property.sold);
+      await addAudit(property.sold ? "Imóvel reativado" : "Imóvel marcado como vendido", `${property.title} · Código ${propertyCode(property)}`).catch(() => undefined);
+      setSuccess(property.sold
+        ? { title:"Imóvel reativado!", message:`${property.title} voltou a aparecer como disponível no catálogo.` }
+        : { title:"Imóvel marcado como vendido!", message:`${property.title} foi atualizado e não aparecerá mais como disponível.` });
+    } catch (error) {
+      alert(`Não foi possível atualizar o imóvel: ${error instanceof Error ? error.message : "erro inesperado"}`);
+    }
   }
   async function remove(property: Property) {
     if (!confirm(`Excluir “${property.title}” permanentemente?`)) return;
@@ -48,12 +57,14 @@ export default function RegisteredPropertiesPage() {
       await addAudit(auditAction, auditDetails).catch(() => undefined);
       if (cleanupError) {
         alert("O imóvel foi excluído do site, mas algumas imagens podem ter ficado no Cloudinary. Tente a limpeza novamente pelo suporte.");
+      } else {
+        setSuccess({ title:"Imóvel excluído!", message:`${property.title} e suas imagens foram removidos com sucesso.` });
       }
     } catch (error) {
       alert(`Não foi possível concluir a exclusão: ${error instanceof Error ? error.message : "erro inesperado"}`);
     }
   }
-  return <section className="admin-properties-page">
+  return <><section className="admin-properties-page">
     <div className="admin-page-head"><div className="admin-head-icon"><Home/></div><div><span>Catálogo</span><h1>Imóveis cadastrados</h1><p>{filteredItems.length} de {items.length} imóvel(is) encontrado(s).</p></div><Link href="/admin" className="admin-btn">Cadastrar novo</Link></div>
 
     <div className="property-admin-filters">
@@ -70,5 +81,5 @@ export default function RegisteredPropertiesPage() {
       <div className="admin-card-actions"><Link href={`/imovel/${property.slug||property.id}`} target="_blank" title="Ver no site"><Eye/></Link><Link href={`/admin/imoveis/${property.id}/editar`} title="Editar"><Edit3/></Link><button onClick={()=>toggleSold(property)} title={property.sold?"Reativar":"Marcar como vendido"}><CheckCircle2/></button><button className="danger" onClick={()=>remove(property)} title="Excluir"><Trash2/></button></div>
     </article>)}</div>
     {!filteredItems.length&&<div className="admin-empty"><Search/><h2>{items.length ? "Nenhum imóvel encontrado" : "Nenhum imóvel cadastrado"}</h2><p>{items.length ? "Tente outro título, código ou localização." : "Cadastre o primeiro imóvel para começar."}</p>{!items.length&&<Link href="/admin" className="admin-btn">Cadastrar primeiro imóvel</Link>}</div>}
-  </section>;
+  </section>{success&&<AdminSuccessModal title={success.title} message={success.message} onClose={()=>setSuccess(null)}/>}</>;
 }

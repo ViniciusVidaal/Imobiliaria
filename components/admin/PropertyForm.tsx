@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { FormEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
-import { CheckCircle2, ImageIcon, Plus, Save, Star, Trash2, Upload } from "lucide-react";
+import { ImageIcon, Plus, Save, Star, Trash2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LOCATIONS, PROPERTY_TYPES } from "@/lib/constants";
 import { saveProperty } from "@/lib/properties";
@@ -13,6 +13,7 @@ import { CurrencyInput } from "@/components/CurrencyInput";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { normalizeStoredPropertyType, propertyTypeRequiresRooms } from "@/lib/property-form-rules";
+import { AdminSuccessModal } from "@/components/admin/AdminSuccessModal";
 
 export const blankProperty: Omit<Property, "id"> = { title:"", slug:"", description:"", transaction:"Compra", type:PROPERTY_TYPES[0], location:LOCATIONS[0], price:0, bedrooms:0, bathrooms:0, suites:0, parking:0, area:0, images:[], featured:false, sold:false };
 
@@ -195,5 +196,5 @@ export function PropertyForm({ property }: { property?: Property }) {
     </div>
     <div className="form-actions"><button className="admin-btn" disabled={busy}>{busy?"Processando...":property?"Salvar alterações":"Cadastrar imóvel"}</button></div>
     {notice&&<p className="notice">{notice}</p>}
-  </form>{exitPrompt && <div className="unsaved-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setExitPrompt(false)}}><section className="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsaved-title"><div className="unsaved-icon"><Save/></div><span>Alterações pendentes</span><h2 id="unsaved-title">Deseja salvar antes de sair?</h2><p>Você alterou informações deste imóvel. Escolha salvar as mudanças ou descartá-las antes de continuar.</p><div><button type="button" className="admin-btn" onClick={saveAndLeave}>Salvar alterações</button><button type="button" className="discard-changes" onClick={discardAndLeave}>Descartar</button><button type="button" className="keep-editing" onClick={()=>setExitPrompt(false)}>Continuar editando</button></div></section></div>}{success && <div className="unsaved-backdrop save-success-backdrop" role="presentation"><section className="unsaved-dialog save-success-dialog" role="dialog" aria-modal="true" aria-labelledby="save-success-title"><div className="save-success-icon"><CheckCircle2/></div><span>Operação concluída</span><h2 id="save-success-title">{success.title}</h2><p>{success.message}</p><div><button type="button" className="admin-btn" onClick={closeSuccess}>Continuar</button></div></section></div>}</>;
+  </form>{exitPrompt && <div className="unsaved-backdrop" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setExitPrompt(false)}}><section className="unsaved-dialog" role="dialog" aria-modal="true" aria-labelledby="unsaved-title"><div className="unsaved-icon"><Save/></div><span>Alterações pendentes</span><h2 id="unsaved-title">Deseja salvar antes de sair?</h2><p>Você alterou informações deste imóvel. Escolha salvar as mudanças ou descartá-las antes de continuar.</p><div><button type="button" className="admin-btn" onClick={saveAndLeave}>Salvar alterações</button><button type="button" className="discard-changes" onClick={discardAndLeave}>Descartar</button><button type="button" className="keep-editing" onClick={()=>setExitPrompt(false)}>Continuar editando</button></div></section></div>}{success && <AdminSuccessModal title={success.title} message={success.message} onClose={closeSuccess}/>}</>;
 }
